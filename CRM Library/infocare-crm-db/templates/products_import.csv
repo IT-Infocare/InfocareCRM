@@ -1,0 +1,4 @@
+sku,name,brand,model,category,unit,list_price_aed,vat_rate,active
+CAM-DOME-4MP,4MP IP dome camera night vision,FOXTECH,FX-312,cctv,pcs,215,5,TRUE
+NVR-16-8TB,16-channel NVR with 8 TB storage,HIKVISION,HM0994,cctv,pcs,850,5,TRUE
+SVC-INSTALL,Installation and commissioning,,,service,job,1000,5,TRUE

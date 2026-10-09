@@ -1,0 +1,39 @@
+
+CUSTOMER_COD CUSTOMER_NAME                                                LAST_INVOICE_NO      LAST_TRAN SALES_VALUE  COMP_CODE
+------------ ------------------------------------------------------------ -------------------- --------- ----------- ----------
+MARK         MARK AND AIRA TRADING L.L.C                                                       03-NOV-25       15750          1
+BOX          THE BOX GENERAL TRADING                                                           30-SEP-25       19425          1
+BETTER       BETTER CHOICE GENERAL TRADING L.L.C                          IC/25/90             08-SEP-25       11550          1
+ARABIEM      ARABI EMIRATES CO.(UAE)                                      IC/25/49             12-MAY-25       15750          1
+DEWA         DUBAI ELECTRICITY AND WATER AUTHORITY                        IC/25/28             26-MAR-25       28875          1
+DATA HUB INT DATA HUB INTEGRATED SOLUTIONS MORO L.L.C                     IC/24/92             08-OCT-24       28875          1
+PROFH        PROFESSIONAL HAIR FIXING CENTER                              IC/24/90             03-SEP-24     13387.5          1
+Arrow        ARROW AVIATION SERVICES FZE                                  IC/24/66             16-JUL-24       11000          1
+MBRS         MOHAMMED BIN RASHID SCHOOL OF GOVERNMENT                     IC/24/53             26-JUN-24       23100          1
+Car          CARBOKENE FZE                                                IC/23/106            13-OCT-23       11646          1
+weid         WEIDMULLER MIDDLE EAST FZE                                   IC/23/80             19-JUL-23       11010          1
+
+CUSTOMER_COD CUSTOMER_NAME                                                LAST_INVOICE_NO      LAST_TRAN SALES_VALUE  COMP_CODE
+------------ ------------------------------------------------------------ -------------------- --------- ----------- ----------
+GECO MECHANI GECO MECHANICAL & ELECTRICAL LTD.CO.                         IC/23/86             01-JUL-23   178496.85          1
+PAVAN        PAVAN JEWELLERY FZC                                          IC/23/17             09-FEB-23       22985          1
+SAS          SAS POWER INDUSTRIES FZE                                     IC/23/45             24-JAN-23     13387.5          1
+QALHAT       QALHAT REAL ESTATE INVESTMENT AND SERVICES LLC               IC/22/43             19-APR-22       15675          1
+0009         TECHNO PROJECTS HO                                           IC/21/26             23-FEB-21     19126.8          1
+naqel        NAQEL COMPANY                                                IC/19/133            20-APR-19       17422          1
+DUNI         DUNIA FINANCE L.L.C.                                         IC/18/407            12-NOV-18       11235          1
+0073         AL OALA INFORMATION TECHNOLOGY W.L.L                         IC/18/199            30-MAY-18       44050          1
+ECCO         ENGINEERING CONTRACTING CO.LLC                               IC/18/195            29-MAY-18       24108          1
+FMEF         FOXTECH MIDDLE EAST (FZC)                                    IC/18/77             20-MAR-18    12228.46          1
+WSLY         WESLEY INTERNATIONAL LIMITED                                 IC/18/55             05-MAR-18    20484.45          1
+
+CUSTOMER_COD CUSTOMER_NAME                                                LAST_INVOICE_NO      LAST_TRAN SALES_VALUE  COMP_CODE
+------------ ------------------------------------------------------------ -------------------- --------- ----------- ----------
+HAMT         HAMRABI TRADING CO LLC                                       IC/18/3              22-JAN-18    59779.02          1
+ASIS         ADVANCED INFORMATION SECURITY SYSTEMS                        SL4975               28-SEP-17       11300          1
+RAZA         RAZA TRADING LLC                                             SL4817               13-JUL-17       10145          1
+SECU2        SECURITY SYSTEMS COMPANY L.L.C                               SL4710               10-APR-17       11543          1
+SIMS         SHARJAH INTERNATIONAL MARINE SPORTS CLUB                     SL4631               12-JAN-17       49170          1
+
+27 rows selected. 
+

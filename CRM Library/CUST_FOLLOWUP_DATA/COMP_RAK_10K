@@ -1,0 +1,35 @@
+
+CUSTOMER_COD CUSTOMER_NAME                                                LAST_INVOICE_NO      LAST_TRAN SALES_VALUE  COMP_CODE
+------------ ------------------------------------------------------------ -------------------- --------- ----------- ----------
+S-Z1-01-0330 QUANTUM INDUSTRIES LLC                                       RK/25/1008           19-DEC-25    12718.65          6
+ENGIE        ENGIE MESCAT ELECTROMECHANICAL SOLUTIONS L.L.C               RK/25/818            11-DEC-25       73395          6
+C-Z1-19-0356 BUILDING/HAREB MOOSA HAREB BIN HAREB AL ALI                  RK/25/880            05-NOV-25       15380          6
+C-Z3-05-0357 EMIRATES MARKETS LLC(DAITH)                                  RK/25/476            04-JUL-25       12050          6
+S-Z4-09-0353 OUTBACK ARMOUR SUSPENSION FZE                                RK/25/435            25-APR-25       16968          6
+C-Z5-20-0355 MARASH PERFUMES                                              RK/24/1086           25-DEC-24    11018.68          6
+N-Z1-13-0354 UNION CEMENT COMPANY PR.J.S.C                                RK/24/914            13-NOV-24       13240          6
+N-Z1-13-0331 SUNREEF YACHTS RMC FZC                                       RK/23/243            23-MAR-23       19425          6
+N-Z1-21-0283 DAHAB DIESEL LLC                                             RK/23/324            16-MAR-23       11300          6
+562          EMPIRE DIESEL TRADING LLC                                    RK/22/1474           26-DEC-22       11865          6
+GLSP1        GLASS SOLUTIONS LLC (PROJECT)                                RK/21/1844           16-DEC-21       13477          6
+
+CUSTOMER_COD CUSTOMER_NAME                                                LAST_INVOICE_NO      LAST_TRAN SALES_VALUE  COMP_CODE
+------------ ------------------------------------------------------------ -------------------- --------- ----------- ----------
+ROYALPALACE  ROYAL PALACE FURNITURE INDUST. CO. LLC                       RK/21/1968           01-DEC-21       13755          6
+SHIFA105     BAIT AL SHIFAA PHARMACY NAKHEEL BRANCH                       RK/20/956            29-DEC-20       10700          6
+RP351        ARC MIDDLE EAST LLC                                          RK/20/289            30-MAR-20    20028.75          6
+R301         HASSAN MOHAMMED KHAMIS EKHNAIB ALSHEMEILLI                   RK/20/120            27-JAN-20       15162          6
+S-Z1-01-0271 NATIONAL TILES & BLOCK COMPANY LIMITED                       RK/20/152            22-JAN-20     14447.5          6
+S-Z1-01-0275 PIONEER CEMENT INDUSTRIES LLC                                RK/19/1088           13-NOV-19       23100          6
+RV101        OBAID MOHAMMED                                               RK/19/1077           10-NOV-19       13000          6
+R218         PIONEER CEMENT INDUSTRIES                                                         31-OCT-19       23100          6
+R143         KELLY STEEL ENGINEERING FZ LLC                               RK/19/860            29-SEP-19       45565          6
+D101         AL FUTTAIM TECHNOLOGIES LLC                                  RK/19/178            08-APR-19       26145          6
+F101         FUJAIRAH ROTANA                                              RK/19/62             28-FEB-19       10500          6
+
+CUSTOMER_COD CUSTOMER_NAME                                                LAST_INVOICE_NO      LAST_TRAN SALES_VALUE  COMP_CODE
+------------ ------------------------------------------------------------ -------------------- --------- ----------- ----------
+D103         DAR OPTICS HEAD OFFICE                                                            29-OCT-18    13256.25          6
+
+23 rows selected. 
+
