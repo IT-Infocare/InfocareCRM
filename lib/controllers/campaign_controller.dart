@@ -16,7 +16,9 @@ class CampaignController extends GetxController {
   }
 
   Future<void> fetchCampaigns() async {
-    isLoading.value = true;
+    if (campaigns.isEmpty) {
+      isLoading.value = true;
+    }
     try {
       final res = await _campaignService.getCampaigns();
       if (res.success && res.data != null) {

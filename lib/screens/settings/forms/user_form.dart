@@ -3,10 +3,12 @@ import 'package:get/get.dart';
 import '../../../config/app_constants.dart';
 import '../../../config/app_theme.dart';
 import '../../../controllers/settings_controller.dart';
+import '../../../models/user_model.dart';
 import '../../../utils/validators.dart';
 
 class UserFormDialog extends StatefulWidget {
-  const UserFormDialog({super.key});
+  final UserModel? user;
+  const UserFormDialog({super.key, this.user});
 
   @override
   State<UserFormDialog> createState() => _UserFormDialogState();
@@ -26,8 +28,34 @@ class _UserFormDialogState extends State<UserFormDialog> {
     {'id': 'br_03', 'name': 'Kerala Back Office', 'code': 'Kerala'},
   ];
 
-  String _selectedRole = AppConstants.roleBranchSales;
+  late String _selectedRole;
   final Set<String> _selectedBranchCodes = {'Dubai'};
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedRole = AppConstants.roleBranchSales;
+
+    if (widget.user != null) {
+      final u = widget.user!;
+      _usernameController.text = u.username;
+      _nameController.text = u.name;
+      _emailController.text = u.email;
+      _phoneController.text = u.phone ?? '';
+
+      final matchedRole = AppConstants.allRoles.firstWhere(
+        (r) => r.toLowerCase() == u.role.toLowerCase(),
+        orElse: () => AppConstants.allRoles.contains(u.role) ? u.role : AppConstants.roleBranchSales,
+      );
+      _selectedRole = matchedRole;
+
+      final branches = u.branch.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty);
+      if (branches.isNotEmpty) {
+        _selectedBranchCodes.clear();
+        _selectedBranchCodes.addAll(branches);
+      }
+    }
+  }
 
   List<Map<String, String>> _getAvailableBranches() {
     if (Get.isRegistered<SettingsController>()) {
@@ -60,22 +88,34 @@ class _UserFormDialogState extends State<UserFormDialog> {
         return;
       }
 
-      final payload = {
+      final payload = <String, dynamic>{
         'username': _usernameController.text.trim().isNotEmpty ? _usernameController.text.trim() : _emailController.text.trim(),
         'name': _nameController.text.trim(),
         'email': _emailController.text.trim(),
-        'password': _passwordController.text.trim().isNotEmpty ? _passwordController.text.trim() : 'Info@1234',
         'phone': _phoneController.text.trim(),
         'role': _selectedRole,
         'branch': _selectedBranchCodes.join(', '),
         'branches': _selectedBranchCodes.toList(),
       };
-      Get.find<SettingsController>().createUser(payload);
+
+      if (_passwordController.text.trim().isNotEmpty) {
+        payload['password'] = _passwordController.text.trim();
+      } else if (widget.user == null) {
+        payload['password'] = 'Info@1234';
+      }
+
+      if (widget.user != null) {
+        Get.find<SettingsController>().updateUser(widget.user!.id, payload);
+      } else {
+        Get.find<SettingsController>().createUser(payload);
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final isEditing = widget.user != null;
+
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Container(
@@ -91,7 +131,10 @@ class _UserFormDialogState extends State<UserFormDialog> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text('Create System User Account', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.textPrimary)),
+                  Text(
+                    isEditing ? 'Edit User Account' : 'Create System User Account',
+                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.textPrimary),
+                  ),
                   IconButton(icon: const Icon(Icons.close, size: 20), onPressed: () => Get.back()),
                 ],
               ),
@@ -122,13 +165,23 @@ class _UserFormDialogState extends State<UserFormDialog> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Text('Password *', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+                                Text(
+                                  isEditing ? 'New Password' : 'Password *',
+                                  style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                                ),
                                 const SizedBox(height: 6),
                                 TextFormField(
                                   controller: _passwordController,
                                   obscureText: true,
-                                  decoration: const InputDecoration(hintText: 'Default: Info@1234'),
-                                  validator: (v) => Validators.required(v, message: 'Password required'),
+                                  decoration: InputDecoration(
+                                    hintText: isEditing ? 'Leave blank to keep unchanged' : 'Default: Info@1234',
+                                  ),
+                                  validator: (v) {
+                                    if (!isEditing && (v == null || v.trim().isEmpty)) {
+                                      return 'Password required';
+                                    }
+                                    return null;
+                                  },
                                 ),
                               ],
                             ),
@@ -234,7 +287,14 @@ class _UserFormDialogState extends State<UserFormDialog> {
                               final code = b['code'] ?? b['name']!;
                               final isSelected = _selectedBranchCodes.contains(code);
                               return FilterChip(
-                                label: Text(code, style: TextStyle(fontSize: 12, color: isSelected ? Colors.white : AppTheme.textPrimary, fontWeight: isSelected ? FontWeight.bold : FontWeight.normal)),
+                                label: Text(
+                                  code,
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: isSelected ? Colors.white : AppTheme.textPrimary,
+                                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                                  ),
+                                ),
                                 selected: isSelected,
                                 selectedColor: AppTheme.primaryTeal,
                                 checkmarkColor: Colors.white,
@@ -272,7 +332,7 @@ class _UserFormDialogState extends State<UserFormDialog> {
                       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                     ),
                     onPressed: _submit,
-                    child: const Text('Create User'),
+                    child: Text(isEditing ? 'Update User' : 'Create User'),
                   ),
                 ],
               ),

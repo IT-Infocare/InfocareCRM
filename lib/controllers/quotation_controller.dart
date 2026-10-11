@@ -23,7 +23,9 @@ class QuotationController extends GetxController {
   }
 
   Future<void> fetchQuotations() async {
-    isLoading.value = true;
+    if (quotations.isEmpty) {
+      isLoading.value = true;
+    }
     try {
       final selectedBranch = Get.isRegistered<AuthController>() ? AuthController.to.selectedBranch.value : 'All';
       final res = await _quotationService.getQuotations(

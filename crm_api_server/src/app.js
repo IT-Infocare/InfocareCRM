@@ -25,15 +25,18 @@ app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
-// Health Check Endpoint
-app.get('/health', (req, res) => {
+// Health Check Endpoints (Root and /api/health for pre-warming)
+const healthHandler = (req, res) => {
   res.json({
     status: 'ok',
     service: 'Infocare CRM Standalone REST API Server',
     version: '1.0.0',
     timestamp: new Date().toISOString()
   });
-});
+};
+app.get('/health', healthHandler);
+app.get('/api/health', healthHandler);
+
 
 // API Routes Registration
 const prefix = process.env.API_PREFIX || '/api';

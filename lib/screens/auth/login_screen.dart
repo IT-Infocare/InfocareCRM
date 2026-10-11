@@ -4,6 +4,8 @@ import '../../config/app_theme.dart';
 import '../../controllers/auth_controller.dart';
 import '../../utils/validators.dart';
 
+import '../../utils/responsive_utils.dart';
+
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -40,14 +42,16 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isMobile = ResponsiveUtils.isMobile(context);
+
     return Scaffold(
       backgroundColor: AppTheme.sidebarBg,
       body: Center(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
+          padding: EdgeInsets.all(isMobile ? 14 : 24),
           child: Container(
-            width: 420,
-            padding: const EdgeInsets.all(36),
+            constraints: const BoxConstraints(maxWidth: 420),
+            padding: EdgeInsets.all(isMobile ? 24 : 36),
             decoration: BoxDecoration(
               color: AppTheme.surface,
               borderRadius: BorderRadius.circular(16),

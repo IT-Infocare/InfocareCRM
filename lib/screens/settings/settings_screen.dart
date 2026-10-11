@@ -43,7 +43,7 @@ class SettingsScreen extends StatelessWidget {
                       ),
                     const SizedBox(width: 8),
                     ElevatedButton.icon(
-                      style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primaryTealDark),
+                      style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primaryTealDark, foregroundColor: Colors.white),
                       onPressed: () => Get.dialog(const ProductFormDialog()),
                       icon: const Icon(Icons.add_shopping_cart, size: 18),
                       label: const Text('Add Product'),
@@ -52,34 +52,35 @@ class SettingsScreen extends StatelessWidget {
                 ),
                 Expanded(
                   child: Obx(() {
-                    if (controller.isLoading.value) {
-                      return const LoadingWidget(message: 'Loading system configurations...');
-                    }
+        if (controller.isLoading.value) {
+          return const LoadingWidget(message: 'Loading system configurations...');
+        }
 
-                    return DefaultTabController(
-                      length: 4,
-                      child: Column(
-                        children: [
-                          Container(
-                            color: AppTheme.surface,
-                            child: const TabBar(
-                              indicatorColor: AppTheme.primaryTeal,
-                              labelColor: AppTheme.primaryTeal,
-                              unselectedLabelColor: AppTheme.textSecondary,
-                              tabs: [
-                                Tab(icon: Icon(Icons.people_outlined, size: 18), text: 'Users & Roles'),
-                                Tab(icon: Icon(Icons.storefront_outlined, size: 18), text: 'Branches'),
-                                Tab(icon: Icon(Icons.inventory_2_outlined, size: 18), text: 'Products Catalog'),
-                                Tab(icon: Icon(Icons.category_outlined, size: 18), text: 'Product Bundles'),
-                              ],
-                            ),
-                          ),
-                          Expanded(
-                            child: TabBarView(
-                              children: [
-                                // Tab 1: Users
-                                Padding(
-                                  padding: const EdgeInsets.all(24),
+        return DefaultTabController(
+          length: 4,
+          child: Column(
+            children: [
+              Container(
+                color: AppTheme.surface,
+                child: const TabBar(
+                  isScrollable: false,
+                  indicatorColor: AppTheme.primaryTeal,
+                  labelColor: AppTheme.primaryTeal,
+                  unselectedLabelColor: AppTheme.textSecondary,
+                  tabs: [
+                    Tab(icon: Icon(Icons.people_outlined, size: 18), text: 'Users & Roles'),
+                    Tab(icon: Icon(Icons.storefront_outlined, size: 18), text: 'Branches'),
+                    Tab(icon: Icon(Icons.inventory_2_outlined, size: 18), text: 'Products Catalog'),
+                    Tab(icon: Icon(Icons.category_outlined, size: 18), text: 'Product Bundles'),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: TabBarView(
+                  children: [
+                    // Tab 1: Users
+                    Padding(
+                      padding: const EdgeInsets.all(24),
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
@@ -110,6 +111,7 @@ class SettingsScreen extends StatelessWidget {
                                             DataColumn(label: Text('ROLE')),
                                             DataColumn(label: Text('BRANCH')),
                                             DataColumn(label: Text('PHONE')),
+                                            DataColumn(label: Text('ACTIONS')),
                                           ],
                                           rows: controller.users.map((u) {
                                             return DataRow(cells: [
@@ -118,6 +120,39 @@ class SettingsScreen extends StatelessWidget {
                                               DataCell(Text(u.role.replaceAll('_', ' ').toUpperCase())),
                                               DataCell(Text(u.branch)),
                                               DataCell(Text(u.phone ?? '-')),
+                                              DataCell(Row(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  IconButton(
+                                                    icon: const Icon(Icons.edit_outlined, size: 18, color: AppTheme.primaryTeal),
+                                                    tooltip: 'Edit User',
+                                                    onPressed: () => Get.dialog(UserFormDialog(user: u)),
+                                                  ),
+                                                  IconButton(
+                                                    icon: const Icon(Icons.delete_outline, size: 18, color: Colors.red),
+                                                    tooltip: 'Delete User',
+                                                    onPressed: () {
+                                                      Get.dialog(
+                                                        AlertDialog(
+                                                          title: const Text('Confirm User Deletion'),
+                                                          content: Text('Are you sure you want to delete user "${u.name}" (${u.email})?'),
+                                                          actions: [
+                                                            TextButton(onPressed: () => Get.back(), child: const Text('Cancel')),
+                                                            ElevatedButton(
+                                                              style: ElevatedButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white),
+                                                              onPressed: () {
+                                                                Get.back();
+                                                                controller.deleteUser(u.id);
+                                                              },
+                                                              child: const Text('Delete'),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      );
+                                                    },
+                                                  ),
+                                                ],
+                                              )),
                                             ]);
                                           }).toList(),
                                         ),

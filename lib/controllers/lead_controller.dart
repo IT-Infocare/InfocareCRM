@@ -34,7 +34,9 @@ class LeadController extends GetxController {
   }
 
   Future<void> fetchLeads({int page = 1}) async {
-    isLoading.value = true;
+    if (leads.isEmpty) {
+      isLoading.value = true;
+    }
     currentPage.value = page;
     try {
       final selectedBranch = Get.isRegistered<AuthController>() ? AuthController.to.selectedBranch.value : 'All';

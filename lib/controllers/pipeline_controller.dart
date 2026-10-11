@@ -33,7 +33,9 @@ class PipelineController extends GetxController {
     final activeBranch = branch ?? (Get.isRegistered<AuthController>() ? AuthController.to.selectedBranch.value : null);
     final effectiveBranch = activeBranch != 'All' ? activeBranch : null;
 
-    isLoading.value = true;
+    if (deals.isEmpty) {
+      isLoading.value = true;
+    }
     try {
       final res = await _pipelineService.getPipelineDeals(branch: effectiveBranch);
       if (res.success && res.data != null) {

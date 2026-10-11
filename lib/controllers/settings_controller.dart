@@ -60,6 +60,33 @@ class SettingsController extends GetxController {
       Get.snackbar('Success', 'New user account created');
       return true;
     }
+    Get.snackbar('Error', res.message ?? 'Failed to create user');
+    return false;
+  }
+
+  Future<bool> updateUser(String id, Map<String, dynamic> payload) async {
+    final res = await _settingsService.updateUser(id, payload);
+    if (res.success && res.data != null) {
+      final index = users.indexWhere((u) => u.id == id);
+      if (index != -1) {
+        users[index] = res.data!;
+      }
+      Get.back();
+      Get.snackbar('Success', 'User updated successfully');
+      return true;
+    }
+    Get.snackbar('Error', res.message ?? 'Failed to update user');
+    return false;
+  }
+
+  Future<bool> deleteUser(String id) async {
+    final res = await _settingsService.deleteUser(id);
+    if (res.success) {
+      users.removeWhere((u) => u.id == id);
+      Get.snackbar('Success', 'User deleted successfully');
+      return true;
+    }
+    Get.snackbar('Error', res.message ?? 'Failed to delete user');
     return false;
   }
 

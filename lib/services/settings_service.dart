@@ -179,6 +179,7 @@ class SettingsService {
       final u = UserModel.fromJson({
         'id': 'usr_${DateTime.now().millisecondsSinceEpoch}',
         'name': payload['name'] ?? '',
+        'username': payload['username'] ?? '',
         'email': payload['email'] ?? '',
         'role': payload['role'] ?? 'branch_sales',
         'branch': payload['branch'] ?? 'Dubai',
@@ -193,5 +194,41 @@ class SettingsService {
       data: payload,
       fromJson: (json) => UserModel.fromJson(json as Map<String, dynamic>),
     );
+  }
+
+  Future<ApiResponse<UserModel>> updateUser(String id, Map<String, dynamic> payload) async {
+    if (AppConfig.enableMockData) {
+      await Future.delayed(const Duration(milliseconds: 300));
+      final idx = _mockUsers.indexWhere((u) => u.id == id);
+      if (idx != -1) {
+        final existing = _mockUsers[idx];
+        final updated = UserModel(
+          id: id,
+          username: payload['username'] ?? existing.username,
+          name: payload['name'] ?? existing.name,
+          email: payload['email'] ?? existing.email,
+          role: payload['role'] ?? existing.role,
+          branch: payload['branch'] ?? existing.branch,
+          phone: payload['phone'] ?? existing.phone,
+        );
+        _mockUsers[idx] = updated;
+        return ApiResponse<UserModel>(success: true, message: 'User updated', data: updated);
+      }
+    }
+
+    return _apiService.put<UserModel>(
+      '/users/$id',
+      data: payload,
+      fromJson: (json) => UserModel.fromJson(json as Map<String, dynamic>),
+    );
+  }
+
+  Future<ApiResponse<void>> deleteUser(String id) async {
+    if (AppConfig.enableMockData) {
+      await Future.delayed(const Duration(milliseconds: 200));
+      _mockUsers.removeWhere((u) => u.id == id);
+      return ApiResponse<void>(success: true, message: 'User deleted');
+    }
+    return _apiService.delete<void>('/users/$id');
   }
 }

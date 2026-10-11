@@ -29,7 +29,9 @@ class DashboardController extends GetxController {
     final activeBranch = branch ?? (Get.isRegistered<AuthController>() ? AuthController.to.selectedBranch.value : null);
     final effectiveBranch = activeBranch != 'All' ? activeBranch : null;
 
-    isLoading.value = true;
+    if (summary.value == null) {
+      isLoading.value = true;
+    }
     errorMessage.value = '';
     try {
       final results = await Future.wait([

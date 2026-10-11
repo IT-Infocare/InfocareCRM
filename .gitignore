@@ -50,4 +50,5 @@ app.*.map.json
 node_modules/
 crm_api_server/node_modules/
 crm_api_server/.env
+*.zip
 

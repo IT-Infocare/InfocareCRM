@@ -23,7 +23,9 @@ class CustomerController extends GetxController {
   }
 
   Future<void> fetchCustomers() async {
-    isLoading.value = true;
+    if (customers.isEmpty) {
+      isLoading.value = true;
+    }
     try {
       final selectedBranch = Get.isRegistered<AuthController>() ? AuthController.to.selectedBranch.value : 'All';
       final res = await _customerService.getCustomers(

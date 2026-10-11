@@ -22,7 +22,9 @@ class TaskController extends GetxController {
   }
 
   Future<void> fetchTasks() async {
-    isLoading.value = true;
+    if (tasks.isEmpty) {
+      isLoading.value = true;
+    }
     try {
       final selectedBranch = Get.isRegistered<AuthController>() ? AuthController.to.selectedBranch.value : 'All';
       final res = await _taskService.getTasks(
