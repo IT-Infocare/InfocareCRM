@@ -82,6 +82,12 @@
   </div>
   <script src="flutter_bootstrap.js" async></script>
   <script>
+    // Asynchronously pre-warm backend REST API on Render to eliminate cold starts
+    try {
+      fetch('https://infocarecrm.onrender.com/api/health', { mode: 'cors' }).catch(function(){});
+    } catch(e) {}
+  </script>
+  <script>
     function removeLoader() {
       var loading = document.getElementById('loading');
       if (loading) {

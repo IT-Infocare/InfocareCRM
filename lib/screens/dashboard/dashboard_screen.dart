@@ -10,7 +10,6 @@ import '../../utils/lead_source_utils.dart';
 import '../../utils/responsive_utils.dart';
 import '../../widgets/app_header.dart';
 import '../../widgets/app_sidebar.dart';
-import '../../widgets/loading_widget.dart';
 import '../../widgets/stat_card.dart';
 
 class DashboardScreen extends StatelessWidget {
@@ -30,18 +29,16 @@ class DashboardScreen extends StatelessWidget {
                 const AppHeader(title: 'Executive Dashboard'),
                 Expanded(
                   child: Obx(() {
-                    if (controller.isLoading.value) {
-                      return const LoadingWidget(message: 'Loading CRM analytics...');
-                    }
-
                     final summary = controller.summary.value;
                     final isDesktop = ResponsiveUtils.isDesktop(context);
 
-                    return SingleChildScrollView(
-                      padding: const EdgeInsets.all(24),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
+                    return Stack(
+                      children: [
+                        SingleChildScrollView(
+                          padding: const EdgeInsets.all(24),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
                           // Executive Welcome Header
                           Obx(() {
                             final user = AuthController.to.currentUser.value;
@@ -316,10 +313,23 @@ class DashboardScreen extends StatelessWidget {
                           ),
                         ],
                       ),
-                    );
-                  }),
-                ),
-              ],
+                    ),
+                    if (controller.isSyncing.value)
+                      const Positioned(
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        child: LinearProgressIndicator(
+                          minHeight: 2.5,
+                          color: AppTheme.primaryTeal,
+                          backgroundColor: Colors.transparent,
+                        ),
+                      ),
+                  ],
+                );
+              }),
+            ),
+          ],
             ),
           ),
         ],

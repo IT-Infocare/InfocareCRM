@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../config/app_theme.dart';
 import '../../controllers/auth_controller.dart';
+import '../../services/api_service.dart';
 import '../../utils/validators.dart';
 
 import '../../utils/responsive_utils.dart';
@@ -18,6 +19,20 @@ class _LoginScreenState extends State<LoginScreen> {
   final _usernameController = TextEditingController(text: 'Admin');
   final _passwordController = TextEditingController(text: 'Info@1234');
   bool _obscurePassword = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _prewarmBackend();
+  }
+
+  void _prewarmBackend() async {
+    try {
+      if (Get.isRegistered<ApiService>()) {
+        await Get.find<ApiService>().get('/health');
+      }
+    } catch (_) {}
+  }
 
   @override
   void dispose() {
@@ -155,7 +170,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               width: 20,
                               child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
                             )
-                          : const Text('Sign In to Web Portal'),
+                          : const Text('Sign into CRM portal'),
                     );
                   }),
                   const SizedBox(height: 24),

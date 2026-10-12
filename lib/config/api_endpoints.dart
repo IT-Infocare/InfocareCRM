@@ -6,6 +6,7 @@ class ApiEndpoints {
   static const String refresh = '/auth/refresh';
 
   // Dashboard
+  static const String dashboardOverview = '/dashboard/overview';
   static const String dashboardSummary = '/dashboard/summary';
   static const String dashboardLeadsBySource = '/dashboard/leads-by-source';
   static const String dashboardFollowUps = '/dashboard/follow-ups';

@@ -27,10 +27,75 @@ class DashboardSummaryData {
   }
 }
 
+class DashboardOverviewData {
+  final DashboardSummaryData summary;
+  final Map<String, int> leadsBySource;
+  final List<TaskModel> followUps;
+  final String briefing;
+
+  DashboardOverviewData({
+    required this.summary,
+    required this.leadsBySource,
+    required this.followUps,
+    required this.briefing,
+  });
+
+  factory DashboardOverviewData.fromJson(Map<String, dynamic> json) {
+    final summaryJson = (json['summary'] as Map<String, dynamic>?) ?? {};
+    final sourcesJson = (json['leads_by_source'] as Map<String, dynamic>?) ?? {};
+    final followUpsList = (json['follow_ups'] as List<dynamic>?) ?? [];
+    final briefingJson = json['briefing'];
+    String briefingText = '';
+    if (briefingJson is Map<String, dynamic>) {
+      briefingText = (briefingJson['ai_summary'] as String?) ?? '';
+    } else if (briefingJson is String) {
+      briefingText = briefingJson;
+    }
+
+    return DashboardOverviewData(
+      summary: DashboardSummaryData.fromJson(summaryJson),
+      leadsBySource: sourcesJson.map((k, v) => MapEntry(k, (v as num).toInt())),
+      followUps: followUpsList.map((t) => TaskModel.fromJson(t as Map<String, dynamic>)).toList(),
+      briefing: briefingText,
+    );
+  }
+}
+
 class DashboardService {
   final ApiService _apiService;
 
   DashboardService(this._apiService);
+
+  Future<ApiResponse<DashboardOverviewData>> getOverview({String? branch}) async {
+    if (AppConfig.enableMockData) {
+      final summaryRes = await getSummary(branch: branch);
+      final sourcesRes = await getLeadsBySource(branch: branch);
+      final followUpsRes = await getTodayFollowUps(branch: branch);
+      final briefingRes = await getMorningBriefing(branch: branch);
+      return ApiResponse<DashboardOverviewData>(
+        success: true,
+        data: DashboardOverviewData(
+          summary: summaryRes.data ?? DashboardSummaryData(
+            newLeadsThisWeek: 0,
+            openPipelineValue: 0,
+            quotesAwaitingReply: 0,
+            followUpsDue: 0,
+          ),
+          leadsBySource: sourcesRes.data ?? {},
+          followUps: followUpsRes.data ?? [],
+          briefing: briefingRes.data ?? '',
+        ),
+      );
+    }
+
+    return _apiService.get<DashboardOverviewData>(
+      ApiEndpoints.dashboardOverview,
+      queryParameters: {
+        if (branch != null) 'branch': branch,
+      },
+      fromJson: (json) => DashboardOverviewData.fromJson(json as Map<String, dynamic>),
+    );
+  }
 
   Future<ApiResponse<DashboardSummaryData>> getSummary({String? branch, String? period}) async {
     if (AppConfig.enableMockData) {
