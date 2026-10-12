@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../config/app_routes.dart';
 import '../../config/app_theme.dart';
 import '../../controllers/auth_controller.dart';
 import '../../services/api_service.dart';
@@ -173,6 +174,17 @@ class _LoginScreenState extends State<LoginScreen> {
                           : const Text('Sign into CRM portal'),
                     );
                   }),
+                  const SizedBox(height: 12),
+                  OutlinedButton.icon(
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppTheme.primaryTeal,
+                      side: BorderSide(color: AppTheme.primaryTeal.withValues(alpha: 0.5)),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                    ),
+                    onPressed: () => Get.toNamed(AppRoutes.speedTest),
+                    icon: const Icon(Icons.speed, size: 18),
+                    label: const Text('Test Speed (Offline / No API Calls)'),
+                  ),
                   const SizedBox(height: 24),
                   const Divider(),
                   const SizedBox(height: 12),

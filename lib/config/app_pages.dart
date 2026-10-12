@@ -15,6 +15,7 @@ import '../screens/tasks/task_list_screen.dart';
 import '../screens/campaigns/campaign_list_screen.dart';
 import '../screens/reports/reports_screen.dart';
 import '../screens/settings/settings_screen.dart';
+import '../screens/test/speed_test_screen.dart';
 
 class AuthMiddleware extends GetMiddleware {
   @override
@@ -93,6 +94,10 @@ class AppPages {
       name: AppRoutes.settings,
       page: () => const SettingsScreen(),
       middlewares: [AuthMiddleware()],
+    ),
+    GetPage(
+      name: AppRoutes.speedTest,
+      page: () => const SpeedTestScreen(),
     ),
   ];
 }

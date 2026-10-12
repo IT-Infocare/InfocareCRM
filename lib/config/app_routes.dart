@@ -12,6 +12,7 @@ class AppRoutes {
   static const String campaigns = '/campaigns';
   static const String reports = '/reports';
   static const String settings = '/settings';
+  static const String speedTest = '/speed-test';
 
   static String leadDetailWithId(String id) => '/leads/$id';
   static String quotationDetailWithId(String id) => '/quotes/$id';
