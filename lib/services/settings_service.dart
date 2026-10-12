@@ -21,9 +21,64 @@ class SettingsService {
   ];
 
   final List<BranchModel> _mockBranches = [
-    BranchModel(id: 'br_01', name: 'Dubai HQ Office', code: 'Dubai', isActive: true),
-    BranchModel(id: 'br_02', name: 'Ras Al Khaimah Branch', code: 'RAK', isActive: true),
-    BranchModel(id: 'br_03', name: 'Kerala Back Office', code: 'Kerala', isActive: true),
+    BranchModel(
+      id: 'br_01',
+      name: 'Infocare Surveillance Systems LLC — Dubai',
+      code: 'DXB',
+      manager: 'Sarah Connor',
+      country: 'UAE',
+      city: 'Dubai',
+      currency: 'AED',
+      vatPercent: 5.0,
+      website: 'https://infocare.ae',
+      poBox: 'P.O. Box 12345, Dubai',
+      phone: '+971 4 321 0000',
+      mobile: '+971 50 111 2222',
+      email: 'dubai@infocare.ae',
+      location: 'Dubai, UAE',
+      trNumber: '100293847500003',
+      address: 'Business Bay, Tower B, Office 1204, Dubai, UAE',
+      isActive: true,
+    ),
+    BranchModel(
+      id: 'br_02',
+      name: 'Infocare Surveillance Systems LLC — RAK',
+      code: 'RAK',
+      manager: 'John Smith',
+      country: 'UAE',
+      city: 'Ras Al Khaimah',
+      currency: 'AED',
+      vatPercent: 5.0,
+      website: 'https://infocare.ae',
+      poBox: 'P.O. Box 6789, RAK',
+      phone: '+971 7 222 0000',
+      mobile: '+971 55 333 4444',
+      email: 'rak@infocare.ae',
+      location: 'Ras Al Khaimah, UAE',
+      trNumber: '100293847500004',
+      address: 'Al Hamra Industrial Zone, Plot 44, RAK, UAE',
+      isActive: true,
+    ),
+    BranchModel(
+      id: 'br_03',
+      name: 'Infocare Back Office — Kerala',
+      code: 'KER',
+      manager: 'Amal Kerala',
+      country: 'India',
+      city: 'Kochi',
+      currency: 'INR',
+      vatPercent: 18.0,
+      website: 'https://infocare.ae',
+      poBox: '682042',
+      timezone: 'Asia/Kolkata',
+      phone: '+91 484 234 5678',
+      mobile: '+91 98950 12345',
+      email: 'kerala@infocare.ae',
+      location: 'Kochi, Kerala, India',
+      trNumber: '32AAAAA0000A1Z5',
+      address: 'Infopark Phase 2, Suite 402, Kochi, India',
+      isActive: true,
+    ),
   ];
 
   final List<ProductModel> _mockProducts = [
@@ -61,9 +116,7 @@ class SettingsService {
       await Future.delayed(const Duration(milliseconds: 300));
       final b = BranchModel.fromJson({
         'id': 'br_${DateTime.now().millisecondsSinceEpoch}',
-        'name': payload['name'] ?? '',
-        'code': payload['code'] ?? '',
-        'is_active': payload['is_active'] ?? true,
+        ...payload,
       });
       _mockBranches.insert(0, b);
       return ApiResponse<BranchModel>(success: true, message: 'Branch created', data: b);
@@ -80,12 +133,12 @@ class SettingsService {
       await Future.delayed(const Duration(milliseconds: 300));
       final idx = _mockBranches.indexWhere((b) => b.id == id);
       if (idx != -1) {
-        final updated = BranchModel(
-          id: id,
-          name: payload['name'] ?? _mockBranches[idx].name,
-          code: payload['code'] ?? _mockBranches[idx].code,
-          isActive: payload['is_active'] ?? payload['isActive'] ?? _mockBranches[idx].isActive,
-        );
+        final old = _mockBranches[idx];
+        final updated = BranchModel.fromJson({
+          ...old.toJson(),
+          ...payload,
+          'id': id,
+        });
         _mockBranches[idx] = updated;
         return ApiResponse<BranchModel>(success: true, message: 'Branch updated', data: updated);
       }

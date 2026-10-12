@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../config/app_routes.dart';
@@ -189,24 +190,99 @@ class SettingsScreen extends StatelessWidget {
                                       Expanded(
                                         child: DataTableShell(
                                           columns: const [
+                                            DataColumn(label: Text('LOGO')),
                                             DataColumn(label: Text('BRANCH NAME')),
-                                            DataColumn(label: Text('CODE / ALIAS')),
-                                            DataColumn(label: Text('TIME ZONE')),
-                                            DataColumn(label: Text('TELEPHONE / MOBILE')),
-                                            DataColumn(label: Text('EMAIL')),
-                                            DataColumn(label: Text('LOCATION')),
+                                            DataColumn(label: Text('MANAGER')),
+                                            DataColumn(label: Text('LOCATION & COUNTRY')),
+                                            DataColumn(label: Text('CURRENCY & VAT')),
+                                            DataColumn(label: Text('CONTACT')),
+                                            DataColumn(label: Text('WEBSITE & PO BOX')),
                                             DataColumn(label: Text('TRN')),
                                             DataColumn(label: Text('STATUS')),
                                             DataColumn(label: Text('ACTIONS')),
                                           ],
                                           rows: controller.branches.map((b) {
                                             return DataRow(cells: [
-                                              DataCell(Text(b.name, style: const TextStyle(fontWeight: FontWeight.bold))),
-                                              DataCell(Text(b.code)),
-                                              DataCell(Text(b.timezone.isNotEmpty ? b.timezone : 'Asia/Dubai', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500))),
-                                              DataCell(Text(b.phone.isNotEmpty ? b.phone : (b.mobile.isNotEmpty ? b.mobile : '-'), style: const TextStyle(fontSize: 12))),
-                                              DataCell(Text(b.email.isNotEmpty ? b.email : '-', style: const TextStyle(fontSize: 12))),
-                                              DataCell(Text(b.location.isNotEmpty ? b.location : '-', style: const TextStyle(fontSize: 12))),
+                                              DataCell(_buildBranchLogoAvatar(b.logoUrl, b.code)),
+                                              DataCell(Column(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                mainAxisAlignment: MainAxisAlignment.center,
+                                                children: [
+                                                  Text(b.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                                                  const SizedBox(height: 3),
+                                                  Container(
+                                                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                                    decoration: BoxDecoration(
+                                                      color: Colors.blueGrey.shade50,
+                                                      borderRadius: BorderRadius.circular(4),
+                                                      border: Border.all(color: Colors.blueGrey.shade200, width: 0.6),
+                                                    ),
+                                                    child: Text(
+                                                      b.code.isNotEmpty ? b.code : 'CODE',
+                                                      style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.blueGrey.shade800),
+                                                    ),
+                                                  ),
+                                                ],
+                                              )),
+                                              DataCell(Row(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  Icon(Icons.person_outline, size: 14, color: Colors.grey.shade600),
+                                                  const SizedBox(width: 4),
+                                                  Text(b.manager.isNotEmpty ? b.manager : '-', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500)),
+                                                ],
+                                              )),
+                                              DataCell(Column(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                mainAxisAlignment: MainAxisAlignment.center,
+                                                children: [
+                                                  Text(
+                                                    b.city.isNotEmpty ? '${b.city}, ${b.country}' : (b.location.isNotEmpty ? b.location : b.country),
+                                                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                                                  ),
+                                                  if (b.timezone.isNotEmpty)
+                                                    Text(b.timezone, style: TextStyle(fontSize: 11, color: Colors.grey.shade600)),
+                                                ],
+                                              )),
+                                              DataCell(Row(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  Container(
+                                                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                                    decoration: BoxDecoration(
+                                                      color: AppTheme.primaryTeal.withValues(alpha: 0.1),
+                                                      borderRadius: BorderRadius.circular(4),
+                                                    ),
+                                                    child: Text(
+                                                      b.currency,
+                                                      style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppTheme.primaryTeal),
+                                                    ),
+                                                  ),
+                                                  const SizedBox(width: 6),
+                                                  Text(
+                                                    '${b.vatPercent.toStringAsFixed(b.vatPercent.truncateToDouble() == b.vatPercent ? 0 : 1)}% VAT',
+                                                    style: TextStyle(fontSize: 11, color: Colors.grey.shade700, fontWeight: FontWeight.w500),
+                                                  ),
+                                                ],
+                                              )),
+                                              DataCell(Column(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                mainAxisAlignment: MainAxisAlignment.center,
+                                                children: [
+                                                  Text(b.phone.isNotEmpty ? b.phone : (b.mobile.isNotEmpty ? b.mobile : '-'), style: const TextStyle(fontSize: 12)),
+                                                  if (b.email.isNotEmpty)
+                                                    Text(b.email, style: TextStyle(fontSize: 11, color: Colors.grey.shade600)),
+                                                ],
+                                              )),
+                                              DataCell(Column(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                mainAxisAlignment: MainAxisAlignment.center,
+                                                children: [
+                                                  Text(b.website.isNotEmpty ? b.website : '-', style: const TextStyle(fontSize: 12, color: AppTheme.primaryTeal)),
+                                                  if (b.poBox.isNotEmpty)
+                                                    Text(b.poBox, style: TextStyle(fontSize: 11, color: Colors.grey.shade600)),
+                                                ],
+                                              )),
                                               DataCell(Text(b.trNumber.isNotEmpty ? b.trNumber : '-', style: const TextStyle(fontSize: 12))),
                                               DataCell(Container(
                                                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -312,5 +388,58 @@ class SettingsScreen extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  static Widget _buildBranchLogoAvatar(String logoUrl, String branchCode) {
+    Widget child;
+    final url = logoUrl.trim();
+    if (url.isNotEmpty) {
+      if (url.startsWith('data:')) {
+        try {
+          final commaIdx = url.indexOf(',');
+          final base64Content = commaIdx != -1 ? url.substring(commaIdx + 1) : url;
+          final bytes = base64Decode(base64Content);
+          child = Image.memory(
+            bytes,
+            fit: BoxFit.contain,
+            errorBuilder: (_, __, ___) => _fallbackLogoIcon(branchCode),
+          );
+        } catch (_) {
+          child = _fallbackLogoIcon(branchCode);
+        }
+      } else if (url.startsWith('http://') || url.startsWith('https://')) {
+        child = Image.network(
+          url,
+          fit: BoxFit.contain,
+          errorBuilder: (_, __, ___) => _fallbackLogoIcon(branchCode),
+        );
+      } else {
+        child = _fallbackLogoIcon(branchCode);
+      }
+    } else {
+      child = _fallbackLogoIcon(branchCode);
+    }
+
+    return Container(
+      width: 38,
+      height: 38,
+      decoration: BoxDecoration(
+        color: AppTheme.primaryTeal.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.grey.shade300, width: 0.8),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Center(child: child),
+    );
+  }
+
+  static Widget _fallbackLogoIcon(String branchCode) {
+    if (branchCode.isNotEmpty) {
+      return Text(
+        branchCode.length > 3 ? branchCode.substring(0, 3).toUpperCase() : branchCode.toUpperCase(),
+        style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppTheme.primaryTeal),
+      );
+    }
+    return const Icon(Icons.storefront, size: 18, color: AppTheme.primaryTeal);
   }
 }
