@@ -11,6 +11,7 @@ class AppRoutes {
   static const String tasks = '/tasks';
   static const String campaigns = '/campaigns';
   static const String reports = '/reports';
+  static const String products = '/products';
   static const String settings = '/settings';
   static const String speedTest = '/speed-test';
 

@@ -212,8 +212,8 @@ class _LoginScreenState extends State<LoginScreen> {
                         onPressed: () => _fillDemoUser('dir.management@infocare.ae', 'Info@1234'),
                       ),
                       ActionChip(
-                        label: const Text('Kerala Back Office', style: TextStyle(fontSize: 11)),
-                        onPressed: () => _fillDemoUser('amal.kerala@infocare.ae', 'Info@1234'),
+                        label: const Text('Sharjah Office', style: TextStyle(fontSize: 11)),
+                        onPressed: () => _fillDemoUser('rashid.n@infocare.ae', 'Info@1234'),
                       ),
                     ],
                   ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../config/app_constants.dart';
 import '../../../config/app_theme.dart';
+import '../../../controllers/auth_controller.dart';
 import '../../../controllers/settings_controller.dart';
 import '../../../models/user_model.dart';
 import '../../../utils/validators.dart';
@@ -23,9 +24,9 @@ class _UserFormDialogState extends State<UserFormDialog> {
   final _phoneController = TextEditingController();
 
   static const List<Map<String, String>> _defaultBranches = [
-    {'id': 'br_01', 'name': 'Dubai HQ Office', 'code': 'Dubai'},
-    {'id': 'br_02', 'name': 'Ras Al Khaimah Branch', 'code': 'RAK'},
-    {'id': 'br_03', 'name': 'Kerala Back Office', 'code': 'Kerala'},
+    {'id': 'br_dxb', 'name': 'InfoCare System Dubai', 'code': 'Dubai'},
+    {'id': 'br_irq', 'name': 'InfoCare System Iraq', 'code': 'Iraq'},
+    {'id': 'br_shj', 'name': 'InfoCare Systems Sharjah', 'code': 'Sharjah'},
   ];
 
   late String _selectedRole;
@@ -58,13 +59,20 @@ class _UserFormDialogState extends State<UserFormDialog> {
   }
 
   List<Map<String, String>> _getAvailableBranches() {
+    if (Get.isRegistered<AuthController>() && AuthController.to.branches.isNotEmpty) {
+      return AuthController.to.branches.where((b) => b.isActive).map((b) => {
+        'id': b.id,
+        'name': b.displayShortName,
+        'code': b.displayShortName,
+      }).toList();
+    }
     if (Get.isRegistered<SettingsController>()) {
       final s = Get.find<SettingsController>();
       if (s.branches.isNotEmpty) {
-        return s.branches.map((b) => {
+        return s.branches.where((b) => b.isActive).map((b) => {
           'id': b.id,
-          'name': b.name,
-          'code': b.code.isNotEmpty ? b.code : b.name,
+          'name': b.displayShortName,
+          'code': b.displayShortName,
         }).toList();
       }
     }
@@ -119,8 +127,11 @@ class _UserFormDialogState extends State<UserFormDialog> {
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Container(
-        width: 560,
-        constraints: const BoxConstraints(maxHeight: 640),
+        width: MediaQuery.of(context).size.width > 600 ? 560 : MediaQuery.of(context).size.width * 0.94,
+        constraints: BoxConstraints(
+          maxWidth: 560,
+          maxHeight: MediaQuery.of(context).size.height * 0.9,
+        ),
         padding: const EdgeInsets.all(28),
         child: Form(
           key: _formKey,
@@ -131,9 +142,12 @@ class _UserFormDialogState extends State<UserFormDialog> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    isEditing ? 'Edit User Account' : 'Create System User Account',
-                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.textPrimary),
+                  Expanded(
+                    child: Text(
+                      isEditing ? 'Edit User Account' : 'Create System User Account',
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.textPrimary),
+                    ),
                   ),
                   IconButton(icon: const Icon(Icons.close, size: 20), onPressed: () => Get.back()),
                 ],

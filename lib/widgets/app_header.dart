@@ -32,20 +32,29 @@ class AppHeader extends StatelessWidget implements PreferredSizeWidget {
       padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Row(
         children: [
-          Text(
-            title,
-            style: const TextStyle(
-              color: AppTheme.textPrimary,
-              fontSize: 20,
-              fontWeight: FontWeight.w700,
-              letterSpacing: -0.3,
+          Expanded(
+            child: Row(
+              children: [
+                Flexible(
+                  child: Text(
+                    title,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: AppTheme.textPrimary,
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: -0.3,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                const BranchSelector(),
+              ],
             ),
           ),
-          const SizedBox(width: 24),
-          const BranchSelector(),
-          const Spacer(),
+          const SizedBox(width: 12),
           if (actions != null) ...actions!,
-          const SizedBox(width: 16),
+          const SizedBox(width: 12),
           IconButton(
             icon: const Icon(Icons.notifications_outlined, color: AppTheme.textSecondary),
             onPressed: () {

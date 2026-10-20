@@ -20,9 +20,12 @@ class AuthService {
         role = 'branch_sales';
       } else if (email.contains('management')) {
         role = 'management';
+      } else if (email.contains('sharjah')) {
+        role = 'branch_sales';
+        branch = 'Sharjah';
       } else if (email.contains('kerala')) {
         role = 'kerala_back_office';
-        branch = 'Kerala';
+        branch = 'Sharjah';
       } else if (email.contains('viewer')) {
         role = 'viewer';
       }

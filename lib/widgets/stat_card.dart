@@ -7,6 +7,7 @@ class StatCard extends StatelessWidget {
   final IconData icon;
   final Color accentColor;
   final String? subtitle;
+  final Color? subtitleColor;
 
   const StatCard({
     super.key,
@@ -15,6 +16,7 @@ class StatCard extends StatelessWidget {
     required this.icon,
     this.accentColor = AppTheme.primaryTeal,
     this.subtitle,
+    this.subtitleColor,
   });
 
   @override
@@ -72,7 +74,7 @@ class StatCard extends StatelessWidget {
                   Text(
                     subtitle!,
                     style: TextStyle(
-                      color: accentColor,
+                      color: subtitleColor ?? accentColor,
                       fontSize: 12,
                       fontWeight: FontWeight.w500,
                     ),

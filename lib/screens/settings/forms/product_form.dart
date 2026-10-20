@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../../controllers/product_controller.dart';
 import '../../../controllers/settings_controller.dart';
+import '../../../models/product_model.dart';
 import '../../../utils/validators.dart';
 
 class ProductFormDialog extends StatefulWidget {
-  const ProductFormDialog({super.key});
+  final ProductModel? product;
+
+  const ProductFormDialog({super.key, this.product});
 
   @override
   State<ProductFormDialog> createState() => _ProductFormDialogState();
@@ -12,11 +16,27 @@ class ProductFormDialog extends StatefulWidget {
 
 class _ProductFormDialogState extends State<ProductFormDialog> {
   final _formKey = GlobalKey<FormState>();
-  final _nameController = TextEditingController();
-  final _skuController = TextEditingController();
-  final _categoryController = TextEditingController(text: 'CCTV');
-  final _unitPriceController = TextEditingController();
-  final _costPriceController = TextEditingController();
+  late final TextEditingController _nameController;
+  late final TextEditingController _skuController;
+  late final TextEditingController _categoryController;
+  late final TextEditingController _unitPriceController;
+  late final TextEditingController _costPriceController;
+
+  bool get isEditing => widget.product != null;
+
+  @override
+  void initState() {
+    super.initState();
+    _nameController = TextEditingController(text: widget.product?.name ?? '');
+    _skuController = TextEditingController(text: widget.product?.sku ?? '');
+    _categoryController = TextEditingController(text: widget.product?.category ?? 'CCTV');
+    _unitPriceController = TextEditingController(
+      text: widget.product != null ? widget.product!.unitPrice.toString() : '',
+    );
+    _costPriceController = TextEditingController(
+      text: widget.product?.costPrice != null ? widget.product!.costPrice.toString() : '',
+    );
+  }
 
   @override
   void dispose() {
@@ -37,7 +57,22 @@ class _ProductFormDialogState extends State<ProductFormDialog> {
         'unit_price': double.tryParse(_unitPriceController.text.trim()) ?? 0.0,
         'cost_price': double.tryParse(_costPriceController.text.trim()) ?? 0.0,
       };
-      Get.find<SettingsController>().createProduct(payload);
+
+      if (isEditing) {
+        if (Get.isRegistered<ProductController>()) {
+          Get.find<ProductController>().updateProduct(widget.product!.id, payload);
+        } else if (Get.isRegistered<SettingsController>()) {
+          // If called from settings
+          Get.back();
+          Get.snackbar('Success', 'Product updated');
+        }
+      } else {
+        if (Get.isRegistered<ProductController>()) {
+          Get.find<ProductController>().createProduct(payload);
+        } else if (Get.isRegistered<SettingsController>()) {
+          Get.find<SettingsController>().createProduct(payload);
+        }
+      }
     }
   }
 
@@ -56,7 +91,10 @@ class _ProductFormDialogState extends State<ProductFormDialog> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text('Add Catalog Product', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  Text(
+                    isEditing ? 'Edit Catalog Product' : 'Add Catalog Product',
+                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
                   IconButton(icon: const Icon(Icons.close, size: 20), onPressed: () => Get.back()),
                 ],
               ),
@@ -136,7 +174,10 @@ class _ProductFormDialogState extends State<ProductFormDialog> {
                 children: [
                   OutlinedButton(onPressed: () => Get.back(), child: const Text('Cancel')),
                   const SizedBox(width: 12),
-                  ElevatedButton(onPressed: _submit, child: const Text('Save Product')),
+                  ElevatedButton(
+                    onPressed: _submit,
+                    child: Text(isEditing ? 'Update Product' : 'Save Product'),
+                  ),
                 ],
               ),
             ],

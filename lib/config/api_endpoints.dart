@@ -65,6 +65,10 @@ class ApiEndpoints {
   static const String filePresign = '/files/presign';
   static const String fileComplete = '/files/complete';
 
-  // Settings
+  // Settings, Branches & Companies
   static const String settings = '/settings';
+  static const String branches = '/branches';
+  static String branchDetail(String id) => '/branches/$id';
+  static const String companies = '/companies';
+  static String companyDetail(String id) => '/companies/$id';
 }

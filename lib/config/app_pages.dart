@@ -14,6 +14,7 @@ import '../screens/customers/customer_detail_screen.dart';
 import '../screens/tasks/task_list_screen.dart';
 import '../screens/campaigns/campaign_list_screen.dart';
 import '../screens/reports/reports_screen.dart';
+import '../screens/products/products_screen.dart';
 import '../screens/settings/settings_screen.dart';
 import '../screens/test/speed_test_screen.dart';
 
@@ -88,6 +89,11 @@ class AppPages {
     GetPage(
       name: AppRoutes.reports,
       page: () => const ReportsScreen(),
+      middlewares: [AuthMiddleware()],
+    ),
+    GetPage(
+      name: AppRoutes.products,
+      page: () => const ProductsScreen(),
       middlewares: [AuthMiddleware()],
     ),
     GetPage(

@@ -1,5 +1,7 @@
 import 'package:get/get.dart';
+import 'auth_controller.dart';
 import '../models/branch_model.dart';
+import '../models/company_model.dart';
 import '../models/product_bundle_model.dart';
 import '../models/product_model.dart';
 import '../models/user_model.dart';
@@ -11,6 +13,7 @@ class SettingsController extends GetxController {
 
   final RxBool isLoading = true.obs;
   final RxList<UserModel> users = <UserModel>[].obs;
+  final RxList<CompanyModel> companies = <CompanyModel>[].obs;
   final RxList<BranchModel> branches = <BranchModel>[].obs;
   final RxList<ProductModel> products = <ProductModel>[].obs;
   final RxList<ProductBundleModel> productBundles = <ProductBundleModel>[].obs;
@@ -28,8 +31,16 @@ class SettingsController extends GetxController {
       final uRes = await _settingsService.getUsers();
       if (uRes.success && uRes.data != null) users.assignAll(uRes.data!);
 
+      final cRes = await _settingsService.getCompanies();
+      if (cRes.success && cRes.data != null) companies.assignAll(cRes.data!);
+
       final bRes = await _settingsService.getBranches();
-      if (bRes.success && bRes.data != null) branches.assignAll(bRes.data!);
+      if (bRes.success && bRes.data != null) {
+        branches.assignAll(bRes.data!);
+        if (Get.isRegistered<AuthController>()) {
+          AuthController.to.branches.assignAll(bRes.data!);
+        }
+      }
 
       final pRes = await _settingsService.getProducts();
       if (pRes.success && pRes.data != null) products.assignAll(pRes.data!);
@@ -39,6 +50,52 @@ class SettingsController extends GetxController {
     } finally {
       isLoading.value = false;
     }
+  }
+
+  String getCompanyName(String companyId) {
+    if (companyId.isEmpty) {
+      return companies.isNotEmpty ? companies.first.name : 'InfoCare Systems';
+    }
+    final found = companies.where((c) => c.id == companyId).firstOrNull;
+    return found?.name ?? (companies.isNotEmpty ? companies.first.name : 'InfoCare Systems');
+  }
+
+  Future<bool> createCompany(Map<String, dynamic> payload) async {
+    final res = await _settingsService.createCompany(payload);
+    if (res.success && res.data != null) {
+      companies.insert(0, res.data!);
+      Get.back();
+      Get.snackbar('Success', 'Parent Company "${res.data!.name}" created successfully');
+      return true;
+    }
+    Get.snackbar('Error', res.message ?? 'Failed to create company');
+    return false;
+  }
+
+  Future<bool> updateCompany(String id, Map<String, dynamic> payload) async {
+    final res = await _settingsService.updateCompany(id, payload);
+    if (res.success && res.data != null) {
+      final index = companies.indexWhere((c) => c.id == id);
+      if (index != -1) {
+        companies[index] = res.data!;
+      }
+      Get.back();
+      Get.snackbar('Success', 'Company updated successfully');
+      return true;
+    }
+    Get.snackbar('Error', res.message ?? 'Failed to update company');
+    return false;
+  }
+
+  Future<bool> deleteCompany(String id) async {
+    final res = await _settingsService.deleteCompany(id);
+    if (res.success) {
+      companies.removeWhere((c) => c.id == id);
+      Get.snackbar('Success', 'Company removed');
+      return true;
+    }
+    Get.snackbar('Error', res.message ?? 'Failed to delete company');
+    return false;
   }
 
   Future<bool> createProduct(Map<String, dynamic> payload) async {
@@ -94,6 +151,9 @@ class SettingsController extends GetxController {
     final res = await _settingsService.createBranch(payload);
     if (res.success && res.data != null) {
       branches.insert(0, res.data!);
+      if (Get.isRegistered<AuthController>()) {
+        AuthController.to.branches.insert(0, res.data!);
+      }
       Get.back();
       Get.snackbar('Success', 'New branch created successfully');
       return true;
@@ -109,6 +169,12 @@ class SettingsController extends GetxController {
       if (index != -1) {
         branches[index] = res.data!;
       }
+      if (Get.isRegistered<AuthController>()) {
+        final aIdx = AuthController.to.branches.indexWhere((b) => b.id == id);
+        if (aIdx != -1) {
+          AuthController.to.branches[aIdx] = res.data!;
+        }
+      }
       Get.back();
       Get.snackbar('Success', 'Branch updated successfully');
       return true;
@@ -121,6 +187,9 @@ class SettingsController extends GetxController {
     final res = await _settingsService.deleteBranch(id);
     if (res.success) {
       branches.removeWhere((b) => b.id == id);
+      if (Get.isRegistered<AuthController>()) {
+        AuthController.to.branches.removeWhere((b) => b.id == id);
+      }
       Get.snackbar('Success', 'Branch deleted successfully');
       return true;
     }

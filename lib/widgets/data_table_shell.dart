@@ -34,54 +34,78 @@ class DataTableShell extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           if (isLoading)
-            const Padding(
-              padding: EdgeInsets.all(40),
-              child: LoadingWidget(),
+            const Expanded(
+              child: Center(
+                child: Padding(
+                  padding: EdgeInsets.all(40),
+                  child: LoadingWidget(),
+                ),
+              ),
             )
           else if (rows.isEmpty)
-            Padding(
-              padding: const EdgeInsets.all(40),
-              child: EmptyState(title: emptyMessage),
+            Expanded(
+              child: Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(40),
+                  child: EmptyState(title: emptyMessage),
+                ),
+              ),
             )
           else
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: ConstrainedBox(
-                constraints: BoxConstraints(minWidth: MediaQuery.of(context).size.width - 300),
-                child: DataTable(
-                  columnSpacing: 24,
-                  horizontalMargin: 20,
-                  headingRowHeight: 44,
-                  dataRowMinHeight: 52,
-                  dataRowMaxHeight: 64,
-                  headingRowColor: WidgetStateProperty.all(AppTheme.background),
-                  headingTextStyle: const TextStyle(
-                    color: AppTheme.textSecondary,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 12,
-                    letterSpacing: 0.5,
-                  ),
-                  dataTextStyle: const TextStyle(
-                    color: AppTheme.textPrimary,
-                    fontSize: 13,
-                  ),
-                  columns: columns,
-                  rows: rows,
-                ),
+            Expanded(
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  return Scrollbar(
+                    thumbVisibility: true,
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.vertical,
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: ConstrainedBox(
+                          constraints: BoxConstraints(minWidth: constraints.maxWidth),
+                          child: DataTable(
+                            columnSpacing: 24,
+                            horizontalMargin: 20,
+                            headingRowHeight: 44,
+                            dataRowMinHeight: 52,
+                            dataRowMaxHeight: 64,
+                            headingRowColor: WidgetStateProperty.all(AppTheme.background),
+                            headingTextStyle: const TextStyle(
+                              color: AppTheme.textSecondary,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 12,
+                              letterSpacing: 0.5,
+                            ),
+                            dataTextStyle: const TextStyle(
+                              color: AppTheme.textPrimary,
+                              fontSize: 13,
+                            ),
+                            columns: columns,
+                            rows: rows,
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                },
               ),
             ),
           if (pagination != null && pagination!.totalPages > 1) ...[
-            const Divider(),
+            const Divider(height: 1),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    'Page ${pagination!.page} of ${pagination!.totalPages} (${pagination!.totalItems} total items)',
-                    style: const TextStyle(color: AppTheme.textSecondary, fontSize: 13),
+                  Flexible(
+                    child: Text(
+                      'Page ${pagination!.page} of ${pagination!.totalPages} (${pagination!.totalItems} total items)',
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(color: AppTheme.textSecondary, fontSize: 13),
+                    ),
                   ),
                   Row(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
                       OutlinedButton(
                         onPressed: pagination!.page > 1 && onPageChanged != null

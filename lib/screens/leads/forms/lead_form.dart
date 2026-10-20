@@ -25,23 +25,39 @@ class _LeadFormDialogState extends State<LeadFormDialog> {
   final _valueController = TextEditingController();
 
   static const List<Map<String, String>> _defaultBranches = [
-    {'id': 'br_01', 'name': 'Dubai HQ Office', 'code': 'Dubai'},
-    {'id': 'br_02', 'name': 'Ras Al Khaimah Branch', 'code': 'RAK'},
-    {'id': 'br_03', 'name': 'Kerala Back Office', 'code': 'Kerala'},
+    {'id': '3eca26c2-6156-4a1c-972b-75d9bf8d2329', 'name': 'Dubai', 'code': 'Dubai'},
+    {'id': '8bfa9d6b-78e1-4419-aec2-670481aa1c75', 'name': 'RAK', 'code': 'RAK'},
+    {'id': '58a0094b-70cd-43be-acf9-4b322edb487c', 'name': 'Sharjah', 'code': 'Sharjah'},
   ];
 
   String _selectedSource = 'website';
   String _selectedBranchId = 'br_01';
   bool _createCustomer = true;
 
+  @override
+  void initState() {
+    super.initState();
+    final branches = _getAvailableBranches();
+    if (branches.isNotEmpty) {
+      _selectedBranchId = branches.first['id']!;
+    }
+  }
+
   List<Map<String, String>> _getAvailableBranches() {
+    if (Get.isRegistered<AuthController>() && AuthController.to.branches.isNotEmpty) {
+      return AuthController.to.branches.where((b) => b.isActive).map((b) => {
+        'id': b.id,
+        'name': b.displayShortName,
+        'code': b.displayShortName,
+      }).toList();
+    }
     if (Get.isRegistered<SettingsController>()) {
       final s = Get.find<SettingsController>();
       if (s.branches.isNotEmpty) {
-        return s.branches.map((b) => {
+        return s.branches.where((b) => b.isActive).map((b) => {
           'id': b.id,
-          'name': b.name,
-          'code': b.code.isNotEmpty ? b.code : b.name,
+          'name': b.displayShortName,
+          'code': b.displayShortName,
         }).toList();
       }
     }
@@ -73,11 +89,14 @@ class _LeadFormDialogState extends State<LeadFormDialog> {
         'company_name': _companyController.text.trim().isNotEmpty ? _companyController.text.trim() : null,
         'phone': _phoneController.text.trim(),
         'email': _emailController.text.trim(),
+        'title': _requirementController.text.trim().isNotEmpty
+            ? _requirementController.text.trim()
+            : '${_nameController.text.trim()} - Enquiry',
         'requirement': _requirementController.text.trim(),
         'source': _selectedSource,
         'branch_id': selectedBranchObj['id'],
         'branch': selectedBranchObj['code'] ?? selectedBranchObj['name'],
-        'owner_id': user?.id ?? 'a0000000-0000-4000-a000-000000000001',
+        'owner_id': user?.id,
         'owner_name': user?.name ?? user?.username ?? 'Admin',
         'estimated_value': double.tryParse(_valueController.text.trim()) ?? 0,
         'status': 'new',

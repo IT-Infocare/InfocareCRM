@@ -95,6 +95,13 @@ class AppSidebar extends StatelessWidget {
                   isCompact: isCompact,
                 ),
                 _buildNavItem(
+                  icon: Icons.inventory_2_outlined,
+                  activeIcon: Icons.inventory_2,
+                  label: 'Products',
+                  route: AppRoutes.products,
+                  isCompact: isCompact,
+                ),
+                _buildNavItem(
                   icon: Icons.people_outline,
                   activeIcon: Icons.people,
                   label: 'Customers',

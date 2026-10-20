@@ -9,12 +9,30 @@ class DashboardSummaryData {
   final num openPipelineValue;
   final int quotesAwaitingReply;
   final int followUpsDue;
+  final int totalLeads;
+  final int totalCustomers;
+  final int openDealsCount;
+  final int totalQuotations;
+  final String currency;
+  final String? newLeadsSubtitle;
+  final String? openPipelineSubtitle;
+  final String? quotesSubtitle;
+  final String? followUpsSubtitle;
 
   DashboardSummaryData({
     required this.newLeadsThisWeek,
     required this.openPipelineValue,
     required this.quotesAwaitingReply,
     required this.followUpsDue,
+    this.totalLeads = 0,
+    this.totalCustomers = 0,
+    this.openDealsCount = 0,
+    this.totalQuotations = 0,
+    this.currency = 'AED',
+    this.newLeadsSubtitle,
+    this.openPipelineSubtitle,
+    this.quotesSubtitle,
+    this.followUpsSubtitle,
   });
 
   factory DashboardSummaryData.fromJson(Map<String, dynamic> json) {
@@ -23,6 +41,15 @@ class DashboardSummaryData {
       openPipelineValue: (json['open_pipeline_value'] as num?) ?? 0,
       quotesAwaitingReply: (json['quotes_awaiting_reply'] as int?) ?? 0,
       followUpsDue: (json['follow_ups_due'] as int?) ?? 0,
+      totalLeads: (json['total_leads'] as int?) ?? 0,
+      totalCustomers: (json['total_customers'] as int?) ?? 0,
+      openDealsCount: (json['open_deals_count'] as int?) ?? 0,
+      totalQuotations: (json['total_quotations'] as int?) ?? 0,
+      currency: (json['currency'] as String?) ?? 'AED',
+      newLeadsSubtitle: json['new_leads_subtitle'] as String?,
+      openPipelineSubtitle: json['open_pipeline_subtitle'] as String?,
+      quotesSubtitle: json['quotes_subtitle'] as String?,
+      followUpsSubtitle: json['follow_ups_subtitle'] as String?,
     );
   }
 }

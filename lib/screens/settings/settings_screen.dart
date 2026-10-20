@@ -5,14 +5,13 @@ import '../../config/app_routes.dart';
 import '../../config/app_theme.dart';
 import '../../controllers/auth_controller.dart';
 import '../../controllers/settings_controller.dart';
-import '../../utils/currency_utils.dart';
 import '../../utils/permission_utils.dart';
 import '../../widgets/app_header.dart';
 import '../../widgets/app_sidebar.dart';
 import '../../widgets/data_table_shell.dart';
 import '../../widgets/loading_widget.dart';
 import 'forms/branch_form.dart';
-import 'forms/product_form.dart';
+import 'forms/company_form.dart';
 import 'forms/user_form.dart';
 
 class SettingsScreen extends StatelessWidget {
@@ -22,8 +21,8 @@ class SettingsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final controller = Get.put(SettingsController());
     final currentUser = AuthController.to.currentUser.value;
-    final canSeeCost = PermissionUtils.canSeeProductCost(currentUser);
     final canManageUsers = PermissionUtils.canManageUsers(currentUser);
+    final isAdmin = PermissionUtils.isAdmin(currentUser);
 
     return Scaffold(
       body: Row(
@@ -42,13 +41,22 @@ class SettingsScreen extends StatelessWidget {
                         icon: const Icon(Icons.person_add_alt, size: 18),
                         label: const Text('Add User'),
                       ),
-                    const SizedBox(width: 8),
-                    ElevatedButton.icon(
-                      style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primaryTealDark, foregroundColor: Colors.white),
-                      onPressed: () => Get.dialog(const ProductFormDialog()),
-                      icon: const Icon(Icons.add_shopping_cart, size: 18),
-                      label: const Text('Add Product'),
-                    ),
+                    if (isAdmin) ...[
+                      const SizedBox(width: 8),
+                      ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primaryTeal, foregroundColor: Colors.white),
+                        onPressed: () => Get.dialog(const CompanyFormDialog()),
+                        icon: const Icon(Icons.corporate_fare, size: 18),
+                        label: const Text('Add Company'),
+                      ),
+                      const SizedBox(width: 8),
+                      ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primaryTealDark, foregroundColor: Colors.white),
+                        onPressed: () => Get.dialog(const BranchFormDialog()),
+                        icon: const Icon(Icons.add_business, size: 18),
+                        label: const Text('Add Branch'),
+                      ),
+                    ],
                   ],
                 ),
                 Expanded(
@@ -58,21 +66,21 @@ class SettingsScreen extends StatelessWidget {
         }
 
         return DefaultTabController(
-          length: 4,
+          length: 3,
           child: Column(
             children: [
               Container(
                 color: AppTheme.surface,
                 child: const TabBar(
-                  isScrollable: false,
+                  isScrollable: true,
+                  tabAlignment: TabAlignment.start,
                   indicatorColor: AppTheme.primaryTeal,
                   labelColor: AppTheme.primaryTeal,
                   unselectedLabelColor: AppTheme.textSecondary,
                   tabs: [
                     Tab(icon: Icon(Icons.people_outlined, size: 18), text: 'Users & Roles'),
+                    Tab(icon: Icon(Icons.corporate_fare_outlined, size: 18), text: 'Companies (Parent)'),
                     Tab(icon: Icon(Icons.storefront_outlined, size: 18), text: 'Branches'),
-                    Tab(icon: Icon(Icons.inventory_2_outlined, size: 18), text: 'Products Catalog'),
-                    Tab(icon: Icon(Icons.category_outlined, size: 18), text: 'Product Bundles'),
                   ],
                 ),
               ),
@@ -88,10 +96,14 @@ class SettingsScreen extends StatelessWidget {
                                       Row(
                                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                         children: [
-                                          const Text(
-                                            'User Accounts & Access Management',
-                                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppTheme.textPrimary),
+                                          const Expanded(
+                                            child: Text(
+                                              'User Accounts & Access Management',
+                                              overflow: TextOverflow.ellipsis,
+                                              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppTheme.textPrimary),
+                                            ),
                                           ),
+                                          const SizedBox(width: 12),
                                           ElevatedButton.icon(
                                             style: ElevatedButton.styleFrom(
                                               backgroundColor: AppTheme.primaryTeal,
@@ -162,7 +174,7 @@ class SettingsScreen extends StatelessWidget {
                                   ),
                                 ),
 
-                                // Tab 2: Branches
+                                // Tab 2: Companies (Parent)
                                 Padding(
                                   padding: const EdgeInsets.all(24),
                                   child: Column(
@@ -171,10 +183,212 @@ class SettingsScreen extends StatelessWidget {
                                       Row(
                                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                         children: [
-                                          const Text(
-                                            'Branch Master Management',
-                                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppTheme.textPrimary),
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                const Text(
+                                                  'Parent Companies & Holding Entities',
+                                                  overflow: TextOverflow.ellipsis,
+                                                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppTheme.textPrimary),
+                                                ),
+                                                const SizedBox(height: 2),
+                                                Text(
+                                                  'Parent enterprise entities (e.g. InfoCare Systems) governing subsidiary branch networks',
+                                                  style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                                                ),
+                                              ],
+                                            ),
                                           ),
+                                          const SizedBox(width: 12),
+                                          ElevatedButton.icon(
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor: AppTheme.primaryTeal,
+                                              foregroundColor: Colors.white,
+                                            ),
+                                            onPressed: () => Get.dialog(const CompanyFormDialog()),
+                                            icon: const Icon(Icons.corporate_fare, size: 18),
+                                            label: const Text('Add Company'),
+                                          ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 16),
+                                      Expanded(
+                                        child: DataTableShell(
+                                          columns: const [
+                                            DataColumn(label: Text('COMPANY NAME')),
+                                            DataColumn(label: Text('TRADE LICENSE & TRN')),
+                                            DataColumn(label: Text('INDUSTRY & EMIRATE')),
+                                            DataColumn(label: Text('BRANCHES COUNT')),
+                                            DataColumn(label: Text('HEADQUARTERS & WEBSITE')),
+                                            DataColumn(label: Text('CONTACT')),
+                                            DataColumn(label: Text('STATUS')),
+                                            DataColumn(label: Text('ACTIONS')),
+                                          ],
+                                          rows: controller.companies.map((c) {
+                                            final branchCount = controller.branches.where((b) => b.companyId == c.id).length;
+                                            return DataRow(cells: [
+                                              DataCell(Row(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  Container(
+                                                    width: 36,
+                                                    height: 36,
+                                                    decoration: BoxDecoration(
+                                                      color: AppTheme.primaryTeal.withValues(alpha: 0.1),
+                                                      borderRadius: BorderRadius.circular(8),
+                                                    ),
+                                                    child: const Icon(Icons.corporate_fare, color: AppTheme.primaryTeal, size: 20),
+                                                  ),
+                                                  const SizedBox(width: 10),
+                                                  Column(
+                                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                                    mainAxisAlignment: MainAxisAlignment.center,
+                                                    children: [
+                                                      Text(c.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                                                      if (c.code.isNotEmpty)
+                                                        Container(
+                                                          margin: const EdgeInsets.only(top: 2),
+                                                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                                          decoration: BoxDecoration(
+                                                            color: Colors.teal.shade50,
+                                                            borderRadius: BorderRadius.circular(4),
+                                                            border: Border.all(color: Colors.teal.shade200, width: 0.6),
+                                                          ),
+                                                          child: Text(
+                                                            c.code,
+                                                            style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.teal.shade900),
+                                                          ),
+                                                        ),
+                                                    ],
+                                                  ),
+                                                ],
+                                              )),
+                                              DataCell(Column(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                mainAxisAlignment: MainAxisAlignment.center,
+                                                children: [
+                                                  Text(c.tradeLicenceNo?.isNotEmpty == true ? c.tradeLicenceNo! : 'No Lic No', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+                                                  if (c.taxNumber?.isNotEmpty == true)
+                                                    Text('TRN: ${c.taxNumber}', style: TextStyle(fontSize: 11, color: Colors.grey.shade600)),
+                                                ],
+                                              )),
+                                              DataCell(Column(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                mainAxisAlignment: MainAxisAlignment.center,
+                                                children: [
+                                                  Text(c.industry?.isNotEmpty == true ? c.industry! : 'General', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500)),
+                                                  Text(c.emirate?.isNotEmpty == true ? '${c.emirate}, ${c.country}' : c.country, style: TextStyle(fontSize: 11, color: Colors.grey.shade600)),
+                                                ],
+                                              )),
+                                              DataCell(Container(
+                                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                                decoration: BoxDecoration(
+                                                  color: AppTheme.accentTealBg,
+                                                  borderRadius: BorderRadius.circular(12),
+                                                  border: Border.all(color: AppTheme.primaryTeal.withValues(alpha: 0.2)),
+                                                ),
+                                                child: Text(
+                                                  '$branchCount ${branchCount == 1 ? "Branch" : "Branches"}',
+                                                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppTheme.primaryTeal),
+                                                ),
+                                              )),
+                                              DataCell(Column(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                mainAxisAlignment: MainAxisAlignment.center,
+                                                children: [
+                                                  Text(c.city?.isNotEmpty == true ? c.city! : c.country, style: const TextStyle(fontSize: 12)),
+                                                  if (c.website?.isNotEmpty == true)
+                                                    Text(c.website!, style: TextStyle(fontSize: 11, color: Colors.blue.shade700)),
+                                                ],
+                                              )),
+                                              DataCell(Column(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                mainAxisAlignment: MainAxisAlignment.center,
+                                                children: [
+                                                  if (c.email?.isNotEmpty == true)
+                                                    Text(c.email!, style: const TextStyle(fontSize: 11)),
+                                                  if (c.phone?.isNotEmpty == true)
+                                                    Text(c.phone!, style: TextStyle(fontSize: 11, color: Colors.grey.shade600)),
+                                                ],
+                                              )),
+                                              DataCell(Container(
+                                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                                decoration: BoxDecoration(
+                                                  color: c.isActive ? Colors.green.shade50 : Colors.grey.shade100,
+                                                  borderRadius: BorderRadius.circular(4),
+                                                  border: Border.all(color: c.isActive ? Colors.green.shade200 : Colors.grey.shade300, width: 0.6),
+                                                ),
+                                                child: Text(
+                                                  c.isActive ? 'Active' : 'Inactive',
+                                                  style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: c.isActive ? Colors.green.shade800 : Colors.grey.shade700),
+                                                ),
+                                              )),
+                                              DataCell(Row(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  IconButton(
+                                                    icon: const Icon(Icons.edit_outlined, size: 18, color: AppTheme.primaryTeal),
+                                                    tooltip: 'Edit Company',
+                                                    onPressed: () => Get.dialog(CompanyFormDialog(company: c)),
+                                                  ),
+                                                  IconButton(
+                                                    icon: const Icon(Icons.delete_outline, size: 18, color: Colors.red),
+                                                    tooltip: 'Delete Company',
+                                                    onPressed: () {
+                                                      Get.dialog(
+                                                        AlertDialog(
+                                                          title: const Text('Confirm Deletion'),
+                                                          content: Text('Are you sure you want to delete parent company "${c.name}"?'),
+                                                          actions: [
+                                                            TextButton(onPressed: () => Get.back(), child: const Text('Cancel')),
+                                                            ElevatedButton(
+                                                              style: ElevatedButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white),
+                                                              onPressed: () => controller.deleteCompany(c.id),
+                                                              child: const Text('Delete'),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      );
+                                                    },
+                                                  ),
+                                                ],
+                                              )),
+                                            ]);
+                                          }).toList(),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+
+                                // Tab 3: Branches
+                                Padding(
+                                  padding: const EdgeInsets.all(24),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                const Text(
+                                                  'Branch Master Management',
+                                                  overflow: TextOverflow.ellipsis,
+                                                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppTheme.textPrimary),
+                                                ),
+                                                const SizedBox(height: 2),
+                                                Text(
+                                                  'Operating branches running under their respective parent companies',
+                                                  style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          const SizedBox(width: 12),
                                           ElevatedButton.icon(
                                             style: ElevatedButton.styleFrom(
                                               backgroundColor: AppTheme.primaryTeal,
@@ -192,6 +406,8 @@ class SettingsScreen extends StatelessWidget {
                                           columns: const [
                                             DataColumn(label: Text('LOGO')),
                                             DataColumn(label: Text('BRANCH NAME')),
+                                            DataColumn(label: Text('SHORT NAME')),
+                                            DataColumn(label: Text('PARENT COMPANY')),
                                             DataColumn(label: Text('MANAGER')),
                                             DataColumn(label: Text('LOCATION & COUNTRY')),
                                             DataColumn(label: Text('CURRENCY & VAT')),
@@ -223,6 +439,37 @@ class SettingsScreen extends StatelessWidget {
                                                     ),
                                                   ),
                                                 ],
+                                              )),
+                                              DataCell(Container(
+                                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                                decoration: BoxDecoration(
+                                                  color: AppTheme.accentTealBg,
+                                                  borderRadius: BorderRadius.circular(6),
+                                                  border: Border.all(color: AppTheme.primaryTeal.withValues(alpha: 0.2)),
+                                                ),
+                                                child: Text(
+                                                  b.shortName.isNotEmpty ? b.shortName : (b.code.isNotEmpty ? b.code : '-'),
+                                                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppTheme.primaryTeal),
+                                                ),
+                                              )),
+                                              DataCell(Container(
+                                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                                decoration: BoxDecoration(
+                                                  color: AppTheme.accentTealBg,
+                                                  borderRadius: BorderRadius.circular(6),
+                                                  border: Border.all(color: AppTheme.primaryTeal.withValues(alpha: 0.2)),
+                                                ),
+                                                child: Row(
+                                                  mainAxisSize: MainAxisSize.min,
+                                                  children: [
+                                                    const Icon(Icons.apartment, size: 13, color: AppTheme.primaryTeal),
+                                                    const SizedBox(width: 4),
+                                                    Text(
+                                                      controller.getCompanyName(b.companyId),
+                                                      style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppTheme.primaryTeal),
+                                                    ),
+                                                  ],
+                                                ),
                                               )),
                                               DataCell(Row(
                                                 mainAxisSize: MainAxisSize.min,
@@ -330,48 +577,6 @@ class SettingsScreen extends StatelessWidget {
                                         ),
                                       ),
                                     ],
-                                  ),
-                                ),
-
-                                // Tab 3: Products Catalog
-                                Padding(
-                                  padding: const EdgeInsets.all(24),
-                                  child: DataTableShell(
-                                    columns: [
-                                      const DataColumn(label: Text('PRODUCT NAME')),
-                                      const DataColumn(label: Text('SKU')),
-                                      const DataColumn(label: Text('CATEGORY')),
-                                      const DataColumn(label: Text('UNIT PRICE')),
-                                      if (canSeeCost) const DataColumn(label: Text('COST PRICE')),
-                                    ],
-                                    rows: controller.products.map((p) {
-                                      return DataRow(cells: [
-                                        DataCell(Text(p.name, style: const TextStyle(fontWeight: FontWeight.bold))),
-                                        DataCell(Text(p.sku)),
-                                        DataCell(Text(p.category ?? 'General')),
-                                        DataCell(Text(CurrencyUtils.format(p.unitPrice))),
-                                        if (canSeeCost) DataCell(Text(CurrencyUtils.format(p.costPrice ?? 0))),
-                                      ]);
-                                    }).toList(),
-                                  ),
-                                ),
-
-                                // Tab 4: Product Bundles
-                                Padding(
-                                  padding: const EdgeInsets.all(24),
-                                  child: DataTableShell(
-                                    columns: const [
-                                      DataColumn(label: Text('BUNDLE NAME')),
-                                      DataColumn(label: Text('DESCRIPTION')),
-                                      DataColumn(label: Text('PACKAGE PRICE')),
-                                    ],
-                                    rows: controller.productBundles.map((b) {
-                                      return DataRow(cells: [
-                                        DataCell(Text(b.name, style: const TextStyle(fontWeight: FontWeight.bold))),
-                                        DataCell(Text(b.description ?? '-')),
-                                        DataCell(Text(CurrencyUtils.format(b.bundlePrice), style: const TextStyle(fontWeight: FontWeight.bold, color: AppTheme.primaryTeal))),
-                                      ]);
-                                    }).toList(),
                                   ),
                                 ),
                               ],

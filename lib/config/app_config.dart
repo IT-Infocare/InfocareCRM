@@ -1,10 +1,19 @@
+import 'package:flutter/foundation.dart';
+
 class AppConfig {
   static const String appName = String.fromEnvironment('APP_NAME', defaultValue: 'InfocareCRM');
   static const String appEnv = String.fromEnvironment('APP_ENV', defaultValue: 'production');
-  static const String apiBaseUrl = String.fromEnvironment(
-    'API_BASE_URL',
-    defaultValue: 'https://infocarecrm.onrender.com/api',
-  );
+  static String get apiBaseUrl {
+    const fromEnv = String.fromEnvironment('API_BASE_URL');
+    if (fromEnv.isNotEmpty) return fromEnv;
+    if (kIsWeb) {
+      final host = Uri.base.host;
+      if (host == 'localhost' || host == '127.0.0.1') {
+        return 'http://localhost:3000/api';
+      }
+    }
+    return 'https://infocarecrm.onrender.com/api';
+  }
   static const int apiTimeoutSeconds = int.fromEnvironment('API_TIMEOUT_SECONDS', defaultValue: 30);
 
   static const String supabaseUrl = String.fromEnvironment(
@@ -21,7 +30,7 @@ class AppConfig {
   static const String defaultBranch = String.fromEnvironment('DEFAULT_BRANCH', defaultValue: 'Dubai');
 
   static List<String> get supportedBranches {
-    const raw = String.fromEnvironment('SUPPORTED_BRANCHES', defaultValue: 'Dubai,RAK,Kerala');
+    const raw = String.fromEnvironment('SUPPORTED_BRANCHES', defaultValue: 'Dubai,RAK,Sharjah');
     return raw.split(',').map((e) => e.trim()).toList();
   }
 

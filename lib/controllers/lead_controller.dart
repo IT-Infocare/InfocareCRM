@@ -104,6 +104,7 @@ class LeadController extends GetxController {
     final res = await _leadService.createLead(finalPayload);
     if (res.success && res.data != null) {
       leads.insert(0, res.data!);
+      fetchLeads();
       Get.back();
       Get.snackbar('Success', 'Lead & Customer created successfully');
       return true;

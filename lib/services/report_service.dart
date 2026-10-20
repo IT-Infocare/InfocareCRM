@@ -25,7 +25,7 @@ class ReportService {
           'pipeline_value_by_branch': {
             'Dubai': 485000,
             'RAK': 210000,
-            'Kerala': 95000,
+            'Sharjah': 95000,
           },
           'conversion_rate_by_salesperson': {
             'Sarah Connor': 24.5,

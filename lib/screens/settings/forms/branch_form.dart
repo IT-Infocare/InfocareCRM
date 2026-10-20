@@ -21,6 +21,7 @@ class _BranchFormDialogState extends State<BranchFormDialog> {
   final _formKey = GlobalKey<FormState>();
 
   late final TextEditingController _nameController;
+  late final TextEditingController _shortNameController;
   late final TextEditingController _codeController;
   late final TextEditingController _logoUrlController;
   late final TextEditingController _managerController;
@@ -36,6 +37,7 @@ class _BranchFormDialogState extends State<BranchFormDialog> {
   late final TextEditingController _trNumberController;
   late final TextEditingController _addressController;
 
+  late String _selectedCompanyId;
   late String _selectedCurrency;
   late String _selectedTimezone;
   late bool _isActive;
@@ -57,6 +59,7 @@ class _BranchFormDialogState extends State<BranchFormDialog> {
 
   static const List<Map<String, String>> _timezones = [
     {'value': 'Asia/Dubai', 'label': 'Asia/Dubai (GST UTC+04:00)'},
+    {'value': 'Asia/Baghdad', 'label': 'Asia/Baghdad (AST UTC+03:00)'},
     {'value': 'Asia/Kolkata', 'label': 'Asia/Kolkata (IST UTC+05:30)'},
     {'value': 'Asia/Riyadh', 'label': 'Asia/Riyadh (AST UTC+03:00)'},
     {'value': 'Europe/London', 'label': 'Europe/London (GMT UTC+00:00)'},
@@ -69,7 +72,16 @@ class _BranchFormDialogState extends State<BranchFormDialog> {
   void initState() {
     super.initState();
     final b = widget.branch;
+    final controller = Get.isRegistered<SettingsController>() ? Get.find<SettingsController>() : null;
+    if (b != null && b.companyId.isNotEmpty) {
+      _selectedCompanyId = b.companyId;
+    } else if (controller != null && controller.companies.isNotEmpty) {
+      _selectedCompanyId = controller.companies.first.id;
+    } else {
+      _selectedCompanyId = 'cmp_01';
+    }
     _nameController = TextEditingController(text: b?.name ?? '');
+    _shortNameController = TextEditingController(text: b?.shortName ?? '');
     _codeController = TextEditingController(text: b?.code ?? '');
     _logoUrl = b?.logoUrl ?? '';
     _logoUrlController = TextEditingController(text: _logoUrl);
@@ -100,6 +112,7 @@ class _BranchFormDialogState extends State<BranchFormDialog> {
   @override
   void dispose() {
     _nameController.dispose();
+    _shortNameController.dispose();
     _codeController.dispose();
     _logoUrlController.dispose();
     _managerController.dispose();
@@ -214,9 +227,14 @@ class _BranchFormDialogState extends State<BranchFormDialog> {
   void _submit() {
     if (_formKey.currentState!.validate()) {
       final vatVal = double.tryParse(_vatPercentController.text.trim()) ?? 5.0;
+      final controller = Get.find<SettingsController>();
 
       final payload = {
+        'company_id': _selectedCompanyId,
+        'company_name': controller.getCompanyName(_selectedCompanyId),
         'name': _nameController.text.trim(),
+        'short_name': _shortNameController.text.trim().isNotEmpty ? _shortNameController.text.trim() : _codeController.text.trim(),
+        'shortName': _shortNameController.text.trim().isNotEmpty ? _shortNameController.text.trim() : _codeController.text.trim(),
         'code': _codeController.text.trim().isNotEmpty ? _codeController.text.trim() : _nameController.text.trim(),
         'logo_url': _logoUrl.trim(),
         'logo': _logoUrl.trim(),
@@ -246,7 +264,6 @@ class _BranchFormDialogState extends State<BranchFormDialog> {
         'is_active': _isActive,
       };
 
-      final controller = Get.find<SettingsController>();
       if (widget.branch != null) {
         controller.updateBranch(widget.branch!.id, payload);
       } else {
@@ -262,8 +279,9 @@ class _BranchFormDialogState extends State<BranchFormDialog> {
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Container(
-        width: 680,
+        width: MediaQuery.of(context).size.width > 720 ? 680 : MediaQuery.of(context).size.width * 0.94,
         constraints: BoxConstraints(
+          maxWidth: 680,
           maxHeight: MediaQuery.of(context).size.height * 0.9,
         ),
         padding: const EdgeInsets.all(28),
@@ -393,6 +411,80 @@ class _BranchFormDialogState extends State<BranchFormDialog> {
                       ),
                       const SizedBox(height: 16),
 
+                      // Section: Parent Company
+                      GetBuilder<SettingsController>(
+                        init: Get.isRegistered<SettingsController>() ? Get.find<SettingsController>() : null,
+                        builder: (sController) {
+                          final companies = sController.companies;
+                          return Container(
+                            padding: const EdgeInsets.all(14),
+                            decoration: BoxDecoration(
+                              color: AppTheme.accentTealBg.withValues(alpha: 0.35),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: AppTheme.primaryTeal.withValues(alpha: 0.3)),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    const Icon(Icons.corporate_fare, size: 18, color: AppTheme.primaryTeal),
+                                    const SizedBox(width: 8),
+                                    const Text(
+                                      'Parent Company (Holding Entity) *',
+                                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppTheme.textPrimary),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 8),
+                                companies.isNotEmpty
+                                    ? DropdownButtonFormField<String>(
+                                        value: companies.any((c) => c.id == _selectedCompanyId)
+                                            ? _selectedCompanyId
+                                            : companies.first.id,
+                                        isExpanded: true,
+                                        decoration: const InputDecoration(
+                                          fillColor: Colors.white,
+                                          filled: true,
+                                          hintText: 'Select Parent Organization',
+                                          prefixIcon: Icon(Icons.apartment, size: 18, color: AppTheme.primaryTeal),
+                                        ),
+                                        items: companies.map((c) {
+                                          return DropdownMenuItem<String>(
+                                            value: c.id,
+                                            child: Text(
+                                              '${c.name} (${c.code.isNotEmpty ? c.code : "Parent"})',
+                                              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                                            ),
+                                          );
+                                        }).toList(),
+                                        onChanged: (val) {
+                                          if (val != null) setState(() => _selectedCompanyId = val);
+                                        },
+                                      )
+                                    : Row(
+                                        children: [
+                                          Container(
+                                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                            decoration: BoxDecoration(
+                                              color: Colors.white,
+                                              borderRadius: BorderRadius.circular(6),
+                                              border: Border.all(color: AppTheme.border),
+                                            ),
+                                            child: const Text(
+                                              'InfoCare Systems (Default Group Parent)',
+                                              style: TextStyle(fontWeight: FontWeight.w600, color: AppTheme.primaryTeal),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
+                      const SizedBox(height: 16),
+
                       // Section 2: Basic Info
                       Row(
                         children: [
@@ -407,6 +499,22 @@ class _BranchFormDialogState extends State<BranchFormDialog> {
                                   controller: _nameController,
                                   decoration: const InputDecoration(hintText: 'e.g. Infocare Surveillance Systems LLC — Dubai'),
                                   validator: (v) => Validators.required(v, message: 'Branch Name required'),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 14),
+                          Expanded(
+                            flex: 2,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text('Branch Short Name *', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+                                const SizedBox(height: 6),
+                                TextFormField(
+                                  controller: _shortNameController,
+                                  decoration: const InputDecoration(hintText: 'e.g. Dubai or Dubai HQ'),
+                                  validator: (v) => Validators.required(v, message: 'Short Name required'),
                                 ),
                               ],
                             ),
