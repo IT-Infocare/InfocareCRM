@@ -80,6 +80,16 @@
     <div class="loading-title">Infocare CRM</div>
     <div class="loading-subtitle">Loading workspace...</div>
   </div>
+  <script>
+    // Ensure any previously cached service worker or stale assets are evicted
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(function(registrations) {
+        for (var i = 0; i < registrations.length; i++) {
+          registrations[i].unregister();
+        }
+      });
+    }
+  </script>
   <script src="flutter_bootstrap.js" async></script>
   <script>
     // Asynchronously pre-warm backend REST API on Render to eliminate cold starts
