@@ -8,8 +8,13 @@ import '../../../utils/validators.dart';
 
 class QuotationLineFormDialog extends StatefulWidget {
   final ValueChanged<QuotationItemModel> onAddLine;
+  final QuotationItemModel? initialItem;
 
-  const QuotationLineFormDialog({super.key, required this.onAddLine});
+  const QuotationLineFormDialog({
+    super.key,
+    required this.onAddLine,
+    this.initialItem,
+  });
 
   @override
   State<QuotationLineFormDialog> createState() => _QuotationLineFormDialogState();
@@ -31,13 +36,28 @@ class _QuotationLineFormDialogState extends State<QuotationLineFormDialog> {
   void initState() {
     super.initState();
     final setCtrl = Get.put(SettingsController());
-    if (setCtrl.products.isNotEmpty) {
-      final p = setCtrl.products.first;
-      _selectedProductId = p.id;
-      _selectedProductName = p.name;
-      _priceController.text = p.unitPrice.toString();
-      if (p.description != null && p.description!.isNotEmpty) {
-        _descController.text = p.description!;
+    if (widget.initialItem != null) {
+      final item = widget.initialItem!;
+      final inCatalogue = setCtrl.products.any((p) => p.id == item.productId);
+      _isCustom = !inCatalogue || item.productId.startsWith('custom_') || item.productId.isEmpty;
+      _selectedProductId = item.productId;
+      _selectedProductName = item.productName;
+      if (_isCustom) {
+        _customNameController.text = item.productName;
+      }
+      _descController.text = item.description ?? '';
+      _qtyController.text = item.quantity.toString();
+      _priceController.text = item.unitPrice.toString();
+      _discController.text = item.discount.toString();
+    } else {
+      if (setCtrl.products.isNotEmpty) {
+        final p = setCtrl.products.first;
+        _selectedProductId = p.id;
+        _selectedProductName = p.name;
+        _priceController.text = p.unitPrice.toString();
+        if (p.description != null && p.description!.isNotEmpty) {
+          _descController.text = p.description!;
+        }
       }
     }
 
@@ -76,7 +96,9 @@ class _QuotationLineFormDialogState extends State<QuotationLineFormDialog> {
 
     final name = _isCustom ? _customNameController.text.trim() : (_selectedProductName ?? '');
     final prodId = _isCustom
-        ? 'custom_${DateTime.now().millisecondsSinceEpoch}'
+        ? (widget.initialItem != null && widget.initialItem!.productId.startsWith('custom_')
+            ? widget.initialItem!.productId
+            : 'custom_${DateTime.now().millisecondsSinceEpoch}')
         : (_selectedProductId ?? '');
 
     if (name.isEmpty) {
@@ -111,7 +133,7 @@ class _QuotationLineFormDialogState extends State<QuotationLineFormDialog> {
     final total = (subtotal - discAmount).clamp(0.0, double.infinity);
 
     final item = QuotationItemModel(
-      id: 'qti_${DateTime.now().millisecondsSinceEpoch}',
+      id: widget.initialItem?.id ?? 'qti_${DateTime.now().millisecondsSinceEpoch}',
       productId: prodId,
       productName: name,
       description: _descController.text.trim(),
@@ -119,7 +141,7 @@ class _QuotationLineFormDialogState extends State<QuotationLineFormDialog> {
       unitPrice: price,
       discount: disc,
       lineTotal: total,
-      sortOrder: 1,
+      sortOrder: widget.initialItem?.sortOrder ?? 1,
     );
 
     widget.onAddLine(item);
@@ -167,9 +189,9 @@ class _QuotationLineFormDialogState extends State<QuotationLineFormDialog> {
                         child: const Icon(Icons.playlist_add_rounded, color: AppTheme.primaryTeal, size: 22),
                       ),
                       const SizedBox(width: 12),
-                      const Text(
-                        'Add Line Item to BOQ',
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.textPrimary),
+                      Text(
+                        widget.initialItem != null ? 'Edit BOQ Line Item' : 'Add Line Item to BOQ',
+                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.textPrimary),
                       ),
                     ],
                   ),
@@ -464,20 +486,25 @@ class _QuotationLineFormDialogState extends State<QuotationLineFormDialog> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Qty: $qty × AED ${price.toStringAsFixed(2)}${disc > 0 ? " (Disc: -$disc%)" : ""}',
-                          style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary),
-                        ),
-                        if (disc > 0)
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
                           Text(
-                            'Savings: AED ${discAmount.toStringAsFixed(2)}',
-                            style: const TextStyle(fontSize: 11, color: Colors.green, fontWeight: FontWeight.w600),
+                            'Qty: $qty × AED ${price.toStringAsFixed(2)}${disc > 0 ? " (Disc: -$disc%)" : ""}',
+                            style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+                            overflow: TextOverflow.ellipsis,
                           ),
-                      ],
+                          if (disc > 0)
+                            Text(
+                              'Savings: AED ${discAmount.toStringAsFixed(2)}',
+                              style: const TextStyle(fontSize: 11, color: Colors.green, fontWeight: FontWeight.w600),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                        ],
+                      ),
                     ),
+                    const SizedBox(width: 12),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
@@ -515,7 +542,10 @@ class _QuotationLineFormDialogState extends State<QuotationLineFormDialog> {
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                     ),
                     icon: const Icon(Icons.check_circle_outline, size: 18),
-                    label: const Text('Add Line Item', style: TextStyle(fontWeight: FontWeight.bold)),
+                    label: Text(
+                      widget.initialItem != null ? 'Update Line Item' : 'Add Line Item',
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
                   ),
                 ],
               ),

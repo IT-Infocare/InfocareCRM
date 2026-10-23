@@ -246,4 +246,30 @@ class QuotationService {
       fromJson: (json) => QuotationModel.fromJson(json as Map<String, dynamic>),
     );
   }
+
+  Future<ApiResponse<QuotationModel>> updateQuotation(String id, Map<String, dynamic> payload) async {
+    if (AppConfig.enableMockData) {
+      await Future.delayed(const Duration(milliseconds: 200));
+      final index = _mockQuotations.indexWhere((q) => q.id == id);
+      if (index != -1) {
+        final existing = _mockQuotations[index];
+        final updated = existing.copyWith(
+          subtotal: payload['subtotal'] ?? existing.subtotal,
+          vatAmount: payload['vat_amount'] ?? existing.vatAmount,
+          totalAmount: payload['total_amount'] ?? existing.totalAmount,
+          items: payload['items'] != null
+              ? (payload['items'] as List<dynamic>).map((e) => QuotationItemModel.fromJson(e as Map<String, dynamic>)).toList()
+              : existing.items,
+        );
+        _mockQuotations[index] = updated;
+        return ApiResponse<QuotationModel>(success: true, message: 'Quotation updated', data: updated);
+      }
+    }
+
+    return _apiService.put<QuotationModel>(
+      ApiEndpoints.quotationDetail(id),
+      data: payload,
+      fromJson: (json) => QuotationModel.fromJson(json as Map<String, dynamic>),
+    );
+  }
 }

@@ -177,20 +177,7 @@ class _QuotationDetailScreenState extends State<QuotationDetailScreen> {
                                       onPressed: () {
                                         Get.dialog(QuotationLineFormDialog(
                                           onAddLine: (newItem) {
-                                            final updatedItems = [...quote.items, newItem];
-                                            num sub = 0;
-                                            for (var i in updatedItems) {
-                                              sub += i.lineTotal;
-                                            }
-                                            num vat = sub * 0.05;
-                                            num total = sub + vat;
-                                            controller.selectedQuotation.value = quote.copyWith(
-                                              items: updatedItems,
-                                              subtotal: sub,
-                                              vatAmount: vat,
-                                              totalAmount: total,
-                                            );
-                                            Get.snackbar('Line Item Added', 'BOQ updated successfully');
+                                            controller.addLineItem(quote.id, newItem);
                                           },
                                         ));
                                       },
@@ -200,47 +187,145 @@ class _QuotationDetailScreenState extends State<QuotationDetailScreen> {
                                   ],
                                 ),
                                 const SizedBox(height: 16),
-                                Table(
-                                  columnWidths: const {
-                                    0: FixedColumnWidth(40),
-                                    1: FlexColumnWidth(3),
-                                    2: FlexColumnWidth(4),
-                                    3: FixedColumnWidth(80),
-                                    4: FixedColumnWidth(120),
-                                    5: FixedColumnWidth(90),
-                                    6: FixedColumnWidth(130),
-                                  },
-                                  border: TableBorder.all(color: AppTheme.border, width: 1),
-                                  children: [
-                                    TableRow(
-                                      decoration: const BoxDecoration(color: AppTheme.background),
+                                if (quote.items.isEmpty)
+                                  Container(
+                                    width: double.infinity,
+                                    padding: const EdgeInsets.symmetric(vertical: 40),
+                                    decoration: BoxDecoration(
+                                      border: Border.all(color: AppTheme.border),
+                                      borderRadius: BorderRadius.circular(8),
+                                      color: AppTheme.background,
+                                    ),
+                                    child: Column(
                                       children: [
-                                        _buildCell('#', isHeader: true),
-                                        _buildCell('ITEM / PRODUCT', isHeader: true),
-                                        _buildCell('DESCRIPTION', isHeader: true),
-                                        _buildCell('QTY', isHeader: true),
-                                        _buildCell('UNIT PRICE', isHeader: true),
-                                        _buildCell('DISC %', isHeader: true),
-                                        _buildCell('LINE TOTAL', isHeader: true),
+                                        Icon(Icons.inventory_2_outlined, size: 40, color: AppTheme.textSecondary.withValues(alpha: 0.6)),
+                                        const SizedBox(height: 10),
+                                        const Text(
+                                          'No line items in this BOQ yet',
+                                          style: TextStyle(fontWeight: FontWeight.w600, color: AppTheme.textPrimary, fontSize: 14),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        const Text(
+                                          'Click "+ Add Line Item" to add products from catalogue or custom items',
+                                          style: TextStyle(color: AppTheme.textSecondary, fontSize: 12),
+                                        ),
+                                        const SizedBox(height: 14),
+                                        OutlinedButton.icon(
+                                          onPressed: () {
+                                            Get.dialog(QuotationLineFormDialog(
+                                              onAddLine: (newItem) {
+                                                controller.addLineItem(quote.id, newItem);
+                                              },
+                                            ));
+                                          },
+                                          icon: const Icon(Icons.add, size: 16),
+                                          label: const Text('Add First Line Item'),
+                                        ),
                                       ],
                                     ),
-                                    ...quote.items.asMap().entries.map((entry) {
-                                      final idx = entry.key + 1;
-                                      final item = entry.value;
-                                      return TableRow(
+                                  )
+                                else
+                                  Table(
+                                    columnWidths: const {
+                                      0: FixedColumnWidth(40),
+                                      1: FlexColumnWidth(3),
+                                      2: FlexColumnWidth(4),
+                                      3: FixedColumnWidth(65),
+                                      4: FixedColumnWidth(105),
+                                      5: FixedColumnWidth(75),
+                                      6: FixedColumnWidth(115),
+                                      7: FixedColumnWidth(80),
+                                    },
+                                    border: TableBorder.all(color: AppTheme.border, width: 1),
+                                    children: [
+                                      TableRow(
+                                        decoration: const BoxDecoration(color: AppTheme.background),
                                         children: [
-                                          _buildCell('$idx'),
-                                          _buildCell(item.productName, isBold: true),
-                                          _buildCell(item.description ?? '-'),
-                                          _buildCell('${item.quantity}'),
-                                          _buildCell(CurrencyUtils.format(item.unitPrice)),
-                                          _buildCell('${item.discount}%'),
-                                          _buildCell(CurrencyUtils.format(item.lineTotal), isBold: true, color: AppTheme.primaryTeal),
+                                          _buildCell('#', isHeader: true),
+                                          _buildCell('ITEM / PRODUCT', isHeader: true),
+                                          _buildCell('DESCRIPTION', isHeader: true),
+                                          _buildCell('QTY', isHeader: true),
+                                          _buildCell('UNIT PRICE', isHeader: true),
+                                          _buildCell('DISC %', isHeader: true),
+                                          _buildCell('LINE TOTAL', isHeader: true),
+                                          _buildCell('ACTIONS', isHeader: true),
                                         ],
-                                      );
-                                    }),
-                                  ],
-                                ),
+                                      ),
+                                      ...quote.items.asMap().entries.map((entry) {
+                                        final idx = entry.key + 1;
+                                        final item = entry.value;
+                                        return TableRow(
+                                          children: [
+                                            _buildCell('$idx'),
+                                            _buildCell(item.productName, isBold: true),
+                                            _buildCell(item.description ?? '-'),
+                                            _buildCell('${item.quantity}'),
+                                            _buildCell(CurrencyUtils.format(item.unitPrice)),
+                                            _buildCell('${item.discount}%'),
+                                            _buildCell(CurrencyUtils.format(item.lineTotal), isBold: true, color: AppTheme.primaryTeal),
+                                            Padding(
+                                              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                                              child: Row(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  IconButton(
+                                                    icon: const Icon(Icons.edit_outlined, size: 16, color: AppTheme.primaryTeal),
+                                                    tooltip: 'Edit item',
+                                                    padding: EdgeInsets.zero,
+                                                    constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
+                                                    onPressed: () {
+                                                      Get.dialog(QuotationLineFormDialog(
+                                                        initialItem: item,
+                                                        onAddLine: (updatedItem) {
+                                                          controller.updateLineItem(quote.id, updatedItem);
+                                                        },
+                                                      ));
+                                                    },
+                                                  ),
+                                                  const SizedBox(width: 4),
+                                                  IconButton(
+                                                    icon: const Icon(Icons.delete_outline, size: 16, color: Colors.redAccent),
+                                                    tooltip: 'Delete item',
+                                                    padding: EdgeInsets.zero,
+                                                    constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
+                                                    onPressed: () {
+                                                      Get.dialog(
+                                                        AlertDialog(
+                                                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                                          title: const Row(
+                                                            children: [
+                                                              Icon(Icons.warning_amber_rounded, color: Colors.redAccent, size: 22),
+                                                              SizedBox(width: 8),
+                                                              Text('Delete Line Item', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                                                            ],
+                                                          ),
+                                                          content: Text('Are you sure you want to remove "${item.productName}" from this BOQ?'),
+                                                          actions: [
+                                                            OutlinedButton(
+                                                              onPressed: () => Get.back(),
+                                                              child: const Text('Cancel'),
+                                                            ),
+                                                            ElevatedButton(
+                                                              style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent, foregroundColor: Colors.white),
+                                                              onPressed: () {
+                                                                Get.back();
+                                                                controller.deleteLineItem(quote.id, item.id);
+                                                              },
+                                                              child: const Text('Delete'),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      );
+                                                    },
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ],
+                                        );
+                                      }),
+                                    ],
+                                  ),
                                 const SizedBox(height: 24),
 
                                 // Calculation Summary
