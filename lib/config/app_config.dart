@@ -1,18 +1,33 @@
-import 'package:flutter/foundation.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class AppConfig {
   static const String appName = String.fromEnvironment('APP_NAME', defaultValue: 'InfocareCRM');
   static const String appEnv = String.fromEnvironment('APP_ENV', defaultValue: 'production');
   static String get apiBaseUrl {
+    String url = '';
     const fromEnv = String.fromEnvironment('API_BASE_URL');
-    if (fromEnv.isNotEmpty) return fromEnv;
-    if (kIsWeb) {
-      final host = Uri.base.host;
-      if (host == 'localhost' || host == '127.0.0.1') {
-        return 'http://localhost:3000/api';
-      }
+    if (fromEnv.isNotEmpty) {
+      url = fromEnv.trim();
+    } else {
+      try {
+        if (dotenv.isInitialized) {
+          final envVal = dotenv.maybeGet('API_BASE_URL');
+          if (envVal != null && envVal.trim().isNotEmpty) {
+            url = envVal.trim();
+          }
+        }
+      } catch (_) {}
     }
-    return 'https://infocarecrm.onrender.com/api';
+    if (url.isEmpty) {
+      url = 'https://infocarecrm.onrender.com/api';
+    }
+    if (url.endsWith('/')) {
+      url = url.substring(0, url.length - 1);
+    }
+    if (!url.endsWith('/api')) {
+      url = '$url/api';
+    }
+    return url;
   }
   static const int apiTimeoutSeconds = int.fromEnvironment('API_TIMEOUT_SECONDS', defaultValue: 30);
 

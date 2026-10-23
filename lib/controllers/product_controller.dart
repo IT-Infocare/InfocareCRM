@@ -9,7 +9,7 @@ class ProductController extends GetxController {
   final ProductService _productService = ProductService(Get.find<ApiService>());
 
   final RxBool isLoading = true.obs;
-  final RxList<ProductModel> products = <ProductModel>[].obs;
+  final RxList<ProductModel> products = RxList<ProductModel>(SettingsController.defaultProducts);
   final RxList<ProductBundleModel> productBundles = <ProductBundleModel>[].obs;
 
   final RxInt activeTabIndex = 0.obs;
@@ -27,13 +27,22 @@ class ProductController extends GetxController {
     try {
       final pRes = await _productService.getProducts();
       if (pRes.success && pRes.data != null) {
-        products.assignAll(pRes.data!);
+        final serverList = pRes.data!;
+        final merged = <ProductModel>[...serverList];
+        for (final def in SettingsController.defaultProducts) {
+          if (!merged.any((p) => p.id == def.id || (p.sku.isNotEmpty && p.sku == def.sku))) {
+            merged.add(def);
+          }
+        }
+        products.assignAll(merged);
       }
 
       final bRes = await _productService.getProductBundles();
       if (bRes.success && bRes.data != null) {
         productBundles.assignAll(bRes.data!);
       }
+    } catch (_) {
+      // keep default/current products
     } finally {
       isLoading.value = false;
     }

@@ -339,4 +339,92 @@ class LeadService {
       fromJson: (json) => ActivityModel.fromJson(json as Map<String, dynamic>),
     );
   }
+
+  Future<ApiResponse<ActivityModel>> updateActivity(
+    String leadId,
+    String activityId, {
+    required String type,
+    required String description,
+  }) async {
+    if (AppConfig.enableMockData) {
+      await Future.delayed(const Duration(milliseconds: 200));
+      return ApiResponse<ActivityModel>(
+        success: true,
+        message: 'Activity updated',
+        data: ActivityModel(
+          id: activityId,
+          leadId: leadId,
+          type: type,
+          description: description,
+          createdBy: 'User',
+          createdAt: DateTime.now(),
+        ),
+      );
+    }
+
+    return _apiService.put<ActivityModel>(
+      ApiEndpoints.leadActivityDetail(leadId, activityId),
+      data: {'type': type, 'description': description},
+      fromJson: (json) => ActivityModel.fromJson(json as Map<String, dynamic>),
+    );
+  }
+
+  Future<ApiResponse<bool>> deleteActivity(String leadId, String activityId) async {
+    if (AppConfig.enableMockData) {
+      await Future.delayed(const Duration(milliseconds: 200));
+      return ApiResponse<bool>(success: true, data: true);
+    }
+
+    final res = await _apiService.delete<dynamic>(
+      ApiEndpoints.leadActivityDetail(leadId, activityId),
+    );
+    return ApiResponse<bool>(success: res.success, message: res.message, data: res.success);
+  }
+
+  Future<ApiResponse<String>> rewriteEmail({
+    required String draft,
+    String? contactName,
+    String? companyName,
+    String? requirement,
+    String? senderName,
+    String? tone,
+    String? apiKey,
+  }) async {
+    final payload = {
+      'draft': draft,
+      if (contactName != null) 'contact_name': contactName,
+      if (companyName != null) 'company_name': companyName,
+      if (requirement != null) 'requirement': requirement,
+      if (senderName != null) 'sender_name': senderName,
+      if (tone != null) 'tone': tone,
+      if (apiKey != null && apiKey.isNotEmpty) 'api_key': apiKey,
+    };
+
+    try {
+      final res = await _apiService.post<dynamic>(
+        ApiEndpoints.aiRewriteEmail,
+        data: payload,
+      );
+
+      if (res.success && res.data != null) {
+        dynamic data = res.data;
+        if (data is Map && data.containsKey('data')) {
+          data = data['data'];
+        }
+        if (data is Map && data.containsKey('rewritten')) {
+          return ApiResponse<String>(success: true, data: data['rewritten'].toString());
+        }
+        if (data is String) {
+          return ApiResponse<String>(success: true, data: data);
+        }
+      }
+      return ApiResponse<String>(
+        success: res.success,
+        message: res.message,
+        data: res.data?.toString(),
+      );
+    } catch (e) {
+      return ApiResponse<String>(success: false, message: e.toString());
+    }
+  }
 }

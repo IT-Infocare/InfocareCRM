@@ -2,6 +2,7 @@ import '../config/api_endpoints.dart';
 import '../config/app_config.dart';
 import '../models/api_response.dart';
 import '../models/deal_model.dart';
+import '../models/lead_model.dart';
 import 'api_service.dart';
 
 class PipelineService {
@@ -111,11 +112,55 @@ class PipelineService {
       return ApiResponse<List<DealModel>>(success: true, data: list);
     }
 
-    return _apiService.get<List<DealModel>>(
+    final res = await _apiService.get<List<DealModel>>(
       ApiEndpoints.pipeline,
       queryParameters: {if (branch != null) 'branch': branch},
       fromJson: (json) => (json as List<dynamic>).map((e) => DealModel.fromJson(e as Map<String, dynamic>)).toList(),
     );
+
+    if (res.success && res.data != null && res.data!.isNotEmpty) {
+      return res;
+    }
+
+    // Direct fallback from leads endpoint to guarantee pipeline always mirrors leads inbox
+    try {
+      final leadsRes = await _apiService.get<dynamic>(
+        ApiEndpoints.leads,
+        queryParameters: {
+          'limit': 100,
+          if (branch != null && branch != 'All') 'branch': branch,
+        },
+      );
+      if (leadsRes.success && leadsRes.data != null) {
+        dynamic rawList = leadsRes.data;
+        if (rawList is Map<String, dynamic> && rawList.containsKey('data')) {
+          rawList = rawList['data'];
+        }
+        if (rawList is List && rawList.isNotEmpty) {
+          final mapped = rawList.map((item) {
+            final lead = LeadModel.fromJson(item as Map<String, dynamic>);
+            return DealModel(
+              id: lead.id,
+              leadId: lead.id,
+              customerName: lead.contactName.isNotEmpty ? lead.contactName : (lead.companyName ?? 'Client'),
+              companyName: lead.companyName,
+              requirement: lead.requirement,
+              estimatedValue: lead.estimatedValue,
+              ownerName: (lead.ownerName != null && lead.ownerName!.isNotEmpty) ? lead.ownerName! : 'Unassigned',
+              source: lead.source,
+              stage: lead.stage.isNotEmpty ? lead.stage : 'new',
+              daysInStage: 1,
+              isStalled: false,
+              branch: lead.branch,
+              createdAt: lead.createdAt,
+            );
+          }).toList();
+          return ApiResponse<List<DealModel>>(success: true, data: mapped);
+        }
+      }
+    } catch (_) {}
+
+    return res;
   }
 
   Future<ApiResponse<DealModel>> updateDealStage(
@@ -138,7 +183,7 @@ class PipelineService {
       }
     }
 
-    return _apiService.patch<DealModel>(
+    final res = await _apiService.patch<DealModel>(
       ApiEndpoints.dealStage(dealId),
       data: {
         'stage': stage,
@@ -146,5 +191,18 @@ class PipelineService {
       },
       fromJson: (json) => DealModel.fromJson(json as Map<String, dynamic>),
     );
+
+    // Sync lead's stage directly to ensure both leads and pipeline stay identical
+    try {
+      await _apiService.put<dynamic>(
+        ApiEndpoints.leadDetail(dealId),
+        data: {
+          'stage': stage,
+          if (lostReason != null) 'lost_reason': lostReason,
+        },
+      );
+    } catch (_) {}
+
+    return res;
   }
 }

@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../config/app_constants.dart';
 import '../../../controllers/lead_controller.dart';
+import '../../../models/activity_model.dart';
 import '../../../utils/validators.dart';
 
 class ActivityFormDialog extends StatefulWidget {
   final String leadId;
+  final ActivityModel? activity;
 
-  const ActivityFormDialog({super.key, required this.leadId});
+  const ActivityFormDialog({super.key, required this.leadId, this.activity});
 
   @override
   State<ActivityFormDialog> createState() => _ActivityFormDialogState();
@@ -15,8 +17,18 @@ class ActivityFormDialog extends StatefulWidget {
 
 class _ActivityFormDialogState extends State<ActivityFormDialog> {
   final _formKey = GlobalKey<FormState>();
-  final _descriptionController = TextEditingController();
-  String _selectedType = 'call';
+  late final TextEditingController _descriptionController;
+  late String _selectedType;
+
+  @override
+  void initState() {
+    super.initState();
+    _descriptionController = TextEditingController(text: widget.activity?.description ?? '');
+    _selectedType = widget.activity?.type ?? 'call';
+    if (!AppConstants.activityTypes.contains(_selectedType)) {
+      _selectedType = 'note';
+    }
+  }
 
   @override
   void dispose() {
@@ -26,17 +38,30 @@ class _ActivityFormDialogState extends State<ActivityFormDialog> {
 
   void _submit() {
     if (_formKey.currentState!.validate()) {
-      Get.find<LeadController>().addActivity(
-        widget.leadId,
-        _selectedType,
-        _descriptionController.text.trim(),
-      );
+      if (widget.activity != null) {
+        Get.find<LeadController>().updateActivity(
+          widget.leadId,
+          widget.activity!.id,
+          _selectedType,
+          _descriptionController.text.trim(),
+        );
+      } else {
+        Get.find<LeadController>().addActivity(
+          widget.leadId,
+          _selectedType,
+          _descriptionController.text.trim(),
+        );
+      }
+      Get.back();
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final isEditing = widget.activity != null;
+
     return Dialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Container(
         width: 480,
         padding: const EdgeInsets.all(24),
@@ -49,7 +74,10 @@ class _ActivityFormDialogState extends State<ActivityFormDialog> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text('Log Lead Activity', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  Text(
+                    isEditing ? 'Edit Activity' : 'Log Lead Activity',
+                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
                   IconButton(icon: const Icon(Icons.close, size: 20), onPressed: () => Get.back()),
                 ],
               ),
@@ -82,7 +110,10 @@ class _ActivityFormDialogState extends State<ActivityFormDialog> {
                 children: [
                   OutlinedButton(onPressed: () => Get.back(), child: const Text('Cancel')),
                   const SizedBox(width: 12),
-                  ElevatedButton(onPressed: _submit, child: const Text('Save Log')),
+                  ElevatedButton(
+                    onPressed: _submit,
+                    child: Text(isEditing ? 'Update Activity' : 'Save Log'),
+                  ),
                 ],
               ),
             ],

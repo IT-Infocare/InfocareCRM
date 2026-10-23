@@ -42,4 +42,24 @@ class ActivityModel {
       'created_at': createdAt.toIso8601String(),
     };
   }
+
+  ActivityModel copyWith({
+    String? id,
+    String? leadId,
+    String? dealId,
+    String? type,
+    String? description,
+    String? createdBy,
+    DateTime? createdAt,
+  }) {
+    return ActivityModel(
+      id: id ?? this.id,
+      leadId: leadId ?? this.leadId,
+      dealId: dealId ?? this.dealId,
+      type: type ?? this.type,
+      description: description ?? this.description,
+      createdBy: createdBy ?? this.createdBy,
+      createdAt: createdAt ?? this.createdAt,
+    );
+  }
 }

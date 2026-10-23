@@ -19,6 +19,7 @@ class ApiEndpoints {
   static String leadOwner(String id) => '/leads/$id/owner';
   static String leadConvert(String id) => '/leads/$id/convert';
   static String leadActivities(String id) => '/leads/$id/activities';
+  static String leadActivityDetail(String id, String activityId) => '/leads/$id/activities/$activityId';
   static String leadTasks(String id) => '/leads/$id/tasks';
 
   // Deals & Pipeline
@@ -71,4 +72,7 @@ class ApiEndpoints {
   static String branchDetail(String id) => '/branches/$id';
   static const String companies = '/companies';
   static String companyDetail(String id) => '/companies/$id';
+
+  // AI Assistant
+  static const String aiRewriteEmail = '/ai/rewrite-email';
 }

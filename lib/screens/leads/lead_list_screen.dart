@@ -15,12 +15,28 @@ import '../../widgets/source_badge.dart';
 import '../../widgets/stage_badge.dart';
 import 'forms/lead_form.dart';
 
-class LeadListScreen extends StatelessWidget {
+class LeadListScreen extends StatefulWidget {
   const LeadListScreen({super.key});
 
   @override
+  State<LeadListScreen> createState() => _LeadListScreenState();
+}
+
+class _LeadListScreenState extends State<LeadListScreen> {
+  late final LeadController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = Get.isRegistered<LeadController>()
+        ? Get.find<LeadController>()
+        : Get.put(LeadController());
+    _controller.fetchLeads();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final controller = Get.put(LeadController());
+    final controller = _controller;
 
     return Scaffold(
       body: Row(
@@ -99,11 +115,41 @@ class LeadListScreen extends StatelessWidget {
                                           lead.contactName,
                                           style: const TextStyle(fontWeight: FontWeight.w600, color: AppTheme.textPrimary),
                                         ),
-                                        if (lead.companyName != null)
+                                        if (lead.companyName != null && lead.companyName!.isNotEmpty)
                                           Text(
                                             lead.companyName!,
                                             style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary),
                                           ),
+                                        if (lead.hasLocation) ...[
+                                          const SizedBox(height: 3),
+                                          Tooltip(
+                                            message: 'Click to open in Google Maps',
+                                            child: InkWell(
+                                              onTap: () => lead.openGoogleMaps(),
+                                              borderRadius: BorderRadius.circular(4),
+                                              child: Row(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  const Icon(Icons.location_on, size: 12, color: Color(0xFFEA4335)),
+                                                  const SizedBox(width: 3),
+                                                  Flexible(
+                                                    child: Text(
+                                                      lead.displayLocation,
+                                                      maxLines: 1,
+                                                      overflow: TextOverflow.ellipsis,
+                                                      style: const TextStyle(
+                                                        fontSize: 11,
+                                                        color: AppTheme.primaryTeal,
+                                                        fontWeight: FontWeight.w600,
+                                                        decoration: TextDecoration.underline,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        ],
                                       ],
                                     ),
                                   ),

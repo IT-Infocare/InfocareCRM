@@ -71,18 +71,32 @@ class _QuotationFormDialogState extends State<QuotationFormDialog> {
 
               const Text('Select Customer *', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
               const SizedBox(height: 6),
-              DropdownButtonFormField<String>(
-                value: _selectedCustomerId,
-                validator: (v) => v == null ? 'Customer is required' : null,
-                items: custCtrl.customers.map((c) {
-                  return DropdownMenuItem(value: c.id, child: Text('${c.name} (${c.companyName ?? "Private"})'));
-                }).toList(),
-                onChanged: (v) {
-                  setState(() {
-                    _selectedCustomerId = v;
+              Obx(() {
+                final custList = custCtrl.customers;
+                final effectiveId = (custList.any((c) => c.id == _selectedCustomerId))
+                    ? _selectedCustomerId
+                    : custList.firstOrNull?.id;
+
+                if (_selectedCustomerId != effectiveId && effectiveId != null) {
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    if (mounted) setState(() => _selectedCustomerId = effectiveId);
                   });
-                },
-              ),
+                }
+
+                return DropdownButtonFormField<String>(
+                  isExpanded: true,
+                  value: effectiveId,
+                  validator: (v) => v == null ? 'Customer is required' : null,
+                  items: custList.map((c) {
+                    return DropdownMenuItem(value: c.id, child: Text('${c.name} (${c.companyName ?? "Private"})'));
+                  }).toList(),
+                  onChanged: (v) {
+                    setState(() {
+                      _selectedCustomerId = v;
+                    });
+                  },
+                );
+              }),
               const SizedBox(height: 16),
 
               const Text('Payment & Warranty Terms', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),

@@ -12,11 +12,27 @@ import '../../widgets/confirmation_dialog.dart';
 import '../../widgets/loading_widget.dart';
 import '../../widgets/source_badge.dart';
 
-class PipelineScreen extends StatelessWidget {
+class PipelineScreen extends StatefulWidget {
   const PipelineScreen({super.key});
 
+  @override
+  State<PipelineScreen> createState() => _PipelineScreenState();
+}
+
+class _PipelineScreenState extends State<PipelineScreen> {
+  late final PipelineController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = Get.isRegistered<PipelineController>()
+        ? Get.find<PipelineController>()
+        : Get.put(PipelineController());
+    _controller.fetchPipelineDeals();
+  }
+
   void _handleStageMove(BuildContext context, DealModel deal, String newStage) async {
-    final controller = Get.find<PipelineController>();
+    final controller = _controller;
     if (newStage == 'lost') {
       final reasonController = TextEditingController();
       final confirm = await showDialog<bool>(
@@ -68,7 +84,7 @@ class PipelineScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.put(PipelineController());
+    final controller = _controller;
 
     return Scaffold(
       body: Row(

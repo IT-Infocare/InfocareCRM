@@ -388,24 +388,6 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
                             );
                           }),
-                          const SizedBox(height: 24),
-
-                          // Enterprise Trust Badge
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(Icons.lock_outline_rounded, size: 14, color: AppTheme.textMuted.withValues(alpha: 0.9)),
-                              const SizedBox(width: 6),
-                              const Text(
-                                '256-bit SSL Encrypted & Protected',
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w500,
-                                  color: AppTheme.textMuted,
-                                ),
-                              ),
-                            ],
-                          ),
                         ],
                       ),
                     ),
