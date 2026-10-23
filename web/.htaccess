@@ -34,15 +34,15 @@
 <IfModule mod_headers.c>
   Header set Access-Control-Allow-Origin "*"
 
-  # 1. HTML and entrypoints: Never cache so updates are immediate
-  <FilesMatch "^(index\.html|flutter_bootstrap\.js|version\.json)$">
-    Header set Cache-Control "no-cache, no-store, must-revalidate"
+  # 1. HTML, application code bundle, and bootstrap: Never cache so updates are immediate
+  <FilesMatch "^(index\.html|flutter_bootstrap\.js|main\.dart\.js|flutter_service_worker\.js|version\.json)$">
+    Header set Cache-Control "no-cache, no-store, must-revalidate, max-age=0"
     Header set Pragma "no-cache"
     Header set Expires "0"
   </FilesMatch>
 
-  # 2. WASM and JS: Allow caching with revalidation
-  <FilesMatch "\.(wasm|js)$">
+  # 2. Canvaskit WASM and engine helpers: Allow caching with revalidation
+  <FilesMatch "(canvaskit|skwasm)\.(wasm|js)$">
     Header set Cache-Control "public, max-age=604800, stale-while-revalidate=86400"
   </FilesMatch>
 

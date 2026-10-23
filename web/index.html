@@ -95,11 +95,24 @@
     <div class="loading-subtitle">Loading workspace...</div>
   </div>
   <script>
-    // Ensure any previously cached service worker or stale assets are evicted
+    // Aggressively evict stale Service Workers and CacheStorage from old builds
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.getRegistrations().then(function(registrations) {
+        var hadWorker = registrations.length > 0;
         for (var i = 0; i < registrations.length; i++) {
           registrations[i].unregister();
+        }
+        if (hadWorker && !sessionStorage.getItem('sw_purged_20261023_v3')) {
+          sessionStorage.setItem('sw_purged_20261023_v3', '1');
+          if (window.caches) {
+            caches.keys().then(function(names) {
+              return Promise.all(names.map(function(n) { return caches.delete(n); }));
+            }).then(function() {
+              window.location.reload();
+            });
+          } else {
+            window.location.reload();
+          }
         }
       });
     }
@@ -111,7 +124,7 @@
       });
     }
   </script>
-  <script src="flutter_bootstrap.js" async></script>
+  <script src="flutter_bootstrap.js?v=20261023_v3" async></script>
   <script>
     // Asynchronously pre-warm backend REST API on Render to eliminate cold starts
     try {
