@@ -97,7 +97,7 @@ class DashboardScreen extends StatelessWidget {
                             crossAxisSpacing: 16,
                             mainAxisSpacing: 16,
                             shrinkWrap: true,
-                            childAspectRatio: isDesktop ? 2.0 : 1.6,
+                            childAspectRatio: isDesktop ? 2.2 : 1.6,
                             physics: const NeverScrollableScrollPhysics(),
                             children: [
                               StatCard(
