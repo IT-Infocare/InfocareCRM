@@ -1,8 +1,7 @@
 <IfModule mod_rewrite.c>
   RewriteEngine On
-  RewriteBase /
   
-  # Route all non-file/directory requests to index.html for SPA routing
+  # Route all non-file/directory requests to index.html in current folder for SPA routing
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteCond %{REQUEST_FILENAME} !-d
   RewriteRule ^ index.html [L]

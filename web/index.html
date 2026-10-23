@@ -2,6 +2,20 @@
 <html>
 <head>
   <base href="$FLUTTER_BASE_HREF">
+  <script>
+    // Dynamically adjust <base href> based on current URL path
+    (function() {
+      try {
+        var base = document.querySelector('base');
+        var path = window.location.pathname || '/';
+        if (path.toLowerCase().indexOf('/crm') === 0) {
+          if (base) base.setAttribute('href', '/CRM/');
+        } else if (path === '/' || path === '') {
+          if (base) base.setAttribute('href', '/');
+        }
+      } catch (e) {}
+    })();
+  </script>
 
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
@@ -86,6 +100,13 @@
       navigator.serviceWorker.getRegistrations().then(function(registrations) {
         for (var i = 0; i < registrations.length; i++) {
           registrations[i].unregister();
+        }
+      });
+    }
+    if (window.caches) {
+      caches.keys().then(function(names) {
+        for (var i = 0; i < names.length; i++) {
+          caches.delete(names[i]);
         }
       });
     }
