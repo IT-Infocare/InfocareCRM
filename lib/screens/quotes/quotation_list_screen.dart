@@ -87,6 +87,7 @@ class QuotationListScreen extends StatelessWidget {
                                     ),
                                   ),
                                   DataCell(Text(q.customerName)),
+                                  DataCell(Text(AppDateUtils.formatDate(q.createdAt))),
                                   DataCell(Text(q.preparedBy)),
                                   DataCell(Text(AppDateUtils.formatDate(q.validUntil))),
                                   DataCell(
@@ -105,6 +106,7 @@ class QuotationListScreen extends StatelessWidget {
                               columns: const [
                                 DataColumn(label: Text('QUOTATION #')),
                                 DataColumn(label: Text('CUSTOMER')),
+                                DataColumn(label: Text('CREATED DATE')),
                                 DataColumn(label: Text('PREPARED BY')),
                                 DataColumn(label: Text('VALID UNTIL')),
                                 DataColumn(label: Text('TOTAL (AED)')),

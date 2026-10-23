@@ -4,7 +4,7 @@ import '../models/pagination_model.dart';
 import 'empty_state.dart';
 import 'loading_widget.dart';
 
-class DataTableShell extends StatelessWidget {
+class DataTableShell extends StatefulWidget {
   final List<DataColumn> columns;
   final List<DataRow> rows;
   final bool isLoading;
@@ -23,6 +23,21 @@ class DataTableShell extends StatelessWidget {
   });
 
   @override
+  State<DataTableShell> createState() => _DataTableShellState();
+}
+
+class _DataTableShellState extends State<DataTableShell> {
+  final ScrollController _verticalController = ScrollController();
+  final ScrollController _horizontalController = ScrollController();
+
+  @override
+  void dispose() {
+    _verticalController.dispose();
+    _horizontalController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
@@ -33,7 +48,7 @@ class DataTableShell extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          if (isLoading)
+          if (widget.isLoading)
             const Expanded(
               child: Center(
                 child: Padding(
@@ -42,12 +57,12 @@ class DataTableShell extends StatelessWidget {
                 ),
               ),
             )
-          else if (rows.isEmpty)
+          else if (widget.rows.isEmpty)
             Expanded(
               child: Center(
                 child: Padding(
                   padding: const EdgeInsets.all(40),
-                  child: EmptyState(title: emptyMessage),
+                  child: EmptyState(title: widget.emptyMessage),
                 ),
               ),
             )
@@ -56,32 +71,39 @@ class DataTableShell extends StatelessWidget {
               child: LayoutBuilder(
                 builder: (context, constraints) {
                   return Scrollbar(
+                    controller: _verticalController,
                     thumbVisibility: true,
                     child: SingleChildScrollView(
+                      controller: _verticalController,
                       scrollDirection: Axis.vertical,
-                      child: SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        child: ConstrainedBox(
-                          constraints: BoxConstraints(minWidth: constraints.maxWidth),
-                          child: DataTable(
-                            columnSpacing: 24,
-                            horizontalMargin: 20,
-                            headingRowHeight: 44,
-                            dataRowMinHeight: 52,
-                            dataRowMaxHeight: 64,
-                            headingRowColor: WidgetStateProperty.all(AppTheme.background),
-                            headingTextStyle: const TextStyle(
-                              color: AppTheme.textSecondary,
-                              fontWeight: FontWeight.w600,
-                              fontSize: 12,
-                              letterSpacing: 0.5,
+                      child: Scrollbar(
+                        controller: _horizontalController,
+                        thumbVisibility: true,
+                        child: SingleChildScrollView(
+                          controller: _horizontalController,
+                          scrollDirection: Axis.horizontal,
+                          child: ConstrainedBox(
+                            constraints: BoxConstraints(minWidth: constraints.maxWidth),
+                            child: DataTable(
+                              columnSpacing: 24,
+                              horizontalMargin: 20,
+                              headingRowHeight: 44,
+                              dataRowMinHeight: 52,
+                              dataRowMaxHeight: 64,
+                              headingRowColor: WidgetStateProperty.all(AppTheme.background),
+                              headingTextStyle: const TextStyle(
+                                color: AppTheme.textSecondary,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 12,
+                                letterSpacing: 0.5,
+                              ),
+                              dataTextStyle: const TextStyle(
+                                color: AppTheme.textPrimary,
+                                fontSize: 13,
+                              ),
+                              columns: widget.columns,
+                              rows: widget.rows,
                             ),
-                            dataTextStyle: const TextStyle(
-                              color: AppTheme.textPrimary,
-                              fontSize: 13,
-                            ),
-                            columns: columns,
-                            rows: rows,
                           ),
                         ),
                       ),
@@ -90,7 +112,7 @@ class DataTableShell extends StatelessWidget {
                 },
               ),
             ),
-          if (pagination != null && pagination!.totalPages > 1) ...[
+          if (widget.pagination != null && widget.pagination!.totalPages > 1) ...[
             const Divider(height: 1),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
@@ -99,7 +121,7 @@ class DataTableShell extends StatelessWidget {
                 children: [
                   Flexible(
                     child: Text(
-                      'Page ${pagination!.page} of ${pagination!.totalPages} (${pagination!.totalItems} total items)',
+                      'Page ${widget.pagination!.page} of ${widget.pagination!.totalPages} (${widget.pagination!.totalItems} total items)',
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(color: AppTheme.textSecondary, fontSize: 13),
                     ),
@@ -108,15 +130,15 @@ class DataTableShell extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       OutlinedButton(
-                        onPressed: pagination!.page > 1 && onPageChanged != null
-                            ? () => onPageChanged!(pagination!.page - 1)
+                        onPressed: widget.pagination!.page > 1 && widget.onPageChanged != null
+                            ? () => widget.onPageChanged!(widget.pagination!.page - 1)
                             : null,
                         child: const Text('Previous'),
                       ),
                       const SizedBox(width: 8),
                       OutlinedButton(
-                        onPressed: pagination!.page < pagination!.totalPages && onPageChanged != null
-                            ? () => onPageChanged!(pagination!.page + 1)
+                        onPressed: widget.pagination!.page < widget.pagination!.totalPages && widget.onPageChanged != null
+                            ? () => widget.onPageChanged!(widget.pagination!.page + 1)
                             : null,
                         child: const Text('Next'),
                       ),

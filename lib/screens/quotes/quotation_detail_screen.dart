@@ -12,6 +12,7 @@ import '../../widgets/app_sidebar.dart';
 import '../../widgets/loading_widget.dart';
 import '../../widgets/status_badge.dart';
 import 'forms/quotation_line_form.dart';
+import 'dialogs/quotation_pdf_preview_dialog.dart';
 
 class QuotationDetailScreen extends StatefulWidget {
   const QuotationDetailScreen({super.key});
@@ -80,8 +81,11 @@ class _QuotationDetailScreenState extends State<QuotationDetailScreen> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                Wrap(
+                                  alignment: WrapAlignment.spaceBetween,
+                                  crossAxisAlignment: WrapCrossAlignment.center,
+                                  runSpacing: 12,
+                                  spacing: 12,
                                   children: [
                                     Row(
                                       children: [
@@ -110,11 +114,13 @@ class _QuotationDetailScreenState extends State<QuotationDetailScreen> {
                                         ],
                                       ],
                                     ),
-                                    Row(
+                                    Wrap(
+                                      spacing: 8,
+                                      runSpacing: 8,
                                       children: [
                                         OutlinedButton.icon(
                                           onPressed: () {
-                                            Get.snackbar('PDF Preview', 'Opening PDF Viewer for ${quote.quotationNumber}');
+                                            Get.dialog(QuotationPdfPreviewDialog(quote: quote));
                                           },
                                           icon: const Icon(Icons.picture_as_pdf, size: 16),
                                           label: const Text('Preview PDF'),
@@ -148,6 +154,7 @@ class _QuotationDetailScreenState extends State<QuotationDetailScreen> {
                                 Row(
                                   children: [
                                     _buildInfoTile('Customer', quote.customerName),
+                                    _buildInfoTile('Created Date', AppDateUtils.formatDate(quote.createdAt)),
                                     _buildInfoTile('Prepared By', quote.preparedBy),
                                     _buildInfoTile('Valid Until', AppDateUtils.formatDate(quote.validUntil)),
                                     _buildInfoTile('Payment Terms', quote.terms ?? 'Standard 50/50'),
@@ -234,7 +241,7 @@ class _QuotationDetailScreenState extends State<QuotationDetailScreen> {
                                       4: FixedColumnWidth(105),
                                       5: FixedColumnWidth(75),
                                       6: FixedColumnWidth(115),
-                                      7: FixedColumnWidth(80),
+                                      7: FixedColumnWidth(110),
                                     },
                                     border: TableBorder.all(color: AppTheme.border, width: 1),
                                     children: [
@@ -403,7 +410,10 @@ class _QuotationDetailScreenState extends State<QuotationDetailScreen> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(label, style: TextStyle(fontSize: fontSize, fontWeight: isBold ? FontWeight.bold : FontWeight.normal)),
+        Flexible(
+          child: Text(label, style: TextStyle(fontSize: fontSize, fontWeight: isBold ? FontWeight.bold : FontWeight.normal)),
+        ),
+        const SizedBox(width: 8),
         Text(
           value,
           style: TextStyle(fontSize: fontSize, fontWeight: isBold ? FontWeight.bold : FontWeight.normal, color: color),
